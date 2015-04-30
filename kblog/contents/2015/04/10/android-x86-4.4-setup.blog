@@ -1,0 +1,103 @@
+Subject: Android-x86-4.4r2 の設定メモ
+Content-type: markdown/text
+Tags: Android, メモ
+Date: 2015/04/10
+Public: yes
+
+Android-x86とVirtualBoxを使った開発用の環境の設定方法メモです。<br>
+以前 4.0 で作ったのですが 4.4 になったらだいぶ変わっていたので備忘録として残します。
+
+画面のバランスこんな感じです。
+(モニタは 1920x1200/22inch、端末は6inchくらいに見えます。)
+
+<img src="/2015/04/10/android-x86-4.4-setup-1.png" />
+
+標準のエミュレータと同じように使えますがこちらは実機並にサクサク動きます。
+
+
+### VirtualBox 
+
+#### ダウンロード
+
+  - [https://www.virtualbox.org/wiki/Downloads](https://www.virtualbox.org/wiki/Downloads)
+    - VirtualBox platform packages
+    - VirtualBox Extension Pack
+
+#### インストール
+
+  - 普通に .exe 叩くだけ。
+  - Extension Pack は VirtualBox にリモートデスクトップ接続するときに必要。
+    - 「ファイル」->「環境設定」->「拡張機能」 からインストールする。
+
+### Android-x86 
+
+#### ダウンロード
+
+  - [http://sourceforge.jp/projects/sfnet_android-x86/](http://sourceforge.jp/projects/sfnet_android-x86/)
+     - から android-x86-4.4-r2.iso  を落とす。
+
+#### インストール
+
+  - VirtualBox で仮想マシンを作る。
+    - OSは Other Linux(32bit)
+    - HDDは最低2G
+    - メモリは512M～1G
+    - ネットワークはブリッジ
+    - リモートディスプレイを有効
+  - android-x86-4.4-r2.iso をCDにマウントして起動。
+    - インストーラでインストール。
+
+#### ネットワーク設定
+
+固定IPを Android-x86 に設定する。
+
+  - Android-x86 をデバックモードで起動
+  - /system/etc/init.sh の最後に以下を追加。
+    - 最後といっても return 0 の行の前。
+<pre>
+ifconfig eth0 {ip-addr} netmask {netmask}
+route add default gw {gateway-ip-addr} dev eth0
+setprop net.eth0.dns1 {dns-ip-addr}
+</pre>
+   - プロキシが必要な場合の設定
+<pre>
+sqlite3 /data/data/com.android.providers.settings/databases/settings.db
+INSERT INTO system VALUES(99, 'http_proxy', '<proxy_server>:<port>');
+</pre>
+
+#### 縦画面モード設定
+
+開発時に適当なサイズとなる 270x480 ピクセルを設定。
+
+  - VirtualBox に画面モード追加
+<pre>
+C:> VBoxManage.exe setextradata {VM name} CustomVideoMode1 270x480x16
+</pre>
+  - Android をデバックモードで起動
+    - /mnt/grub/menu.lst を編集して kernel のオプションに以下を追加
+<pre>
+video=-16 UVESA_MODE=240x480
+</pre>
+  - DPIを120に設定
+<pre>
+C:> adb connect {ip-addr}
+C:> adb shell wm density 120
+</pre>
+
+### Eclipse との接続
+
+  - VM 起動後に以下のコマンドを実行
+<pre>
+C:> adb disconnect {ip-addr}
+C:> adb connect {ip-addr}
+</pre>
+  - DDMS が自動的に認識してくれる。
+
+### その他
+
+  - Android-x86 は VirtualBox のマウス統合が使えないので結構不便。
+  - リモートデスクトップ接続すると解消される。
+    - 但し、描画は遅くなる。
+
+
+
