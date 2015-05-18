@@ -1,0 +1,47 @@
+Subject: iOSとAndroidのライフサイクル比較
+Content-type: markdown/text
+Tags: iOS, Android
+Date: 2015/05/18
+Public: yes
+
+
+iOSとAndroidの差異で一番気になっていたライフサイクルの違いを調べてみました。
+
+とりあえず意味的に近そうな主要メソッドの対応表です。
+
+<img src="/2015/05/18/iOS-Android-life-cycle-1.png" />
+
+漠然と AppDelegate＝Application、ViewController＝Activity と考えていたのですが
+整理して見ると役割がだいぶ違うようです。
+
+iOS では素直に AppDelegate＝アプリ、ViewController＝画面制御 と考えて良さそうですが、
+Android では Application の役割が希薄で Activity＝サブアプリ＋画面制御 になっています。
+ViewController は Fragment として考えたほうが良いのかもしれません。
+
+モジュールの対比はこんな感じでしょうか？
+
+<img src="/2015/05/18/iOS-Android-life-cycle-2.png" />
+
+iOS→Android の移植の場合には AppDelegate＝Activity、ViewController＝Fragment
+とするとシンプルに行きそうです。
+
+Android→iOS の移植は難しそうです。複数の Activity を持つアプリの場合、
+単純にマッピングできないのでケースバイケースで対応を考えるしかなさそうです。
+
+Android は iOS をもっとパクっていると思っていたのですが基本的な考え方から異なるようですね。
+アプリの根幹の部分の差異なので共通アプリを作る場合には設計時点で考慮しておく必要がありそうです。
+
+### 所感
+
+こんな情報はネットにいくらでも転がってると思っていたんだけど以外に見つからない。
+iOSとAndroidの相互移植は頻繁に発生してると思うんだが...
+
+思う所有って iOS の勉強を始めたのだが iOS の開発ってハードル高いよね。<br>
+まず Mac 買わなきゃいけない。
+勉強目的なので Mac book は予算オーバーで mini を購入。
+
+<iframe src="http://rcm-fe.amazon-adsystem.com/e/cm?t=kotemaru-22&o=9&p=8&l=as1&asins=B00OLBDJXO&ref=qf_sp_asin_til&fc1=DDDDAA&IS2=1&lt1=_blank&m=amazon&lc1=0000FF&bc1=000000&bg1=FFFFDD&f=ifr" style="width:120px;height:240px;" scrolling="no" marginwidth="0" marginheight="0" frameborder="0"></iframe>
+
+しかも、ユーザにはメモリ拡張すらさせないボッタクリ。
+ますますアップルが嫌いになりますw
+
