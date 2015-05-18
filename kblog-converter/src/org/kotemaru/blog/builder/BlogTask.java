@@ -54,6 +54,7 @@ public class BlogTask extends Task {
 			initBlogContext(isDraft);
 			if (isDraft) {
 				new BuilderDraft().build(context);
+				new BuilderExcludePage().build(context);
 				return;
 			}
 			if ("all".equals(build)) {
