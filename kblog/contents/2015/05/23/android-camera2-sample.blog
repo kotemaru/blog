@@ -1,0 +1,561 @@
+Subject: AndroidのCamera2 APIのサンプル
+Content-type: markdown/text
+Tags: Android
+Date: 2015/05/23
+Public: yes
+
+カメラの実装をしようとしたら android.hardware.Camera が Deprecated だって怒られた。<br>
+android.hardware.camera2 と言うのが API Level 21 から出来ていてこちらを使えとのことらしい。<br>
+でも Level 21 って、Android/5.0 以上だよね。<br>
+いきなり 4.x を Deprecated にするとか Google 強気すぎるだろw
+
+5.0が普及するまで使われる事は無いと思うけど使い方だけも確認しておこうと思い調べてみた。
+
+参考にしたのはGoogle製の以下のサンプル。
+
+  - [Android Camera2Basic Sample](https://github.com/googlesamples/android-Camera2Basic)
+
+毎度の事ながらGoogleのサンプルはスパゲティで訳がわかりません。<br>
+サンプルを自分で書き起こす事にしました。
+
+### 旧Camera API との違い
+
+全部違いますw<br>
+とりあえず要点は以下
+
+  - プレビューは SafaceView でなく TextureView を使う。
+  - 撮影した画像は android.media.ImageReader 経由で取得する。
+  - オートフォーカスや露出はアプリ側がプレビューをハンドリングしながら行う。
+
+旧APIは最初にパラメータ設定して後はお任せな感じでしたが
+Camera2 API はアプリ側のロジックでカメラを制御していく感じです。
+細かな制御ができるようになった分、アプリが複雑になった印象です。
+
+尚、シャッタースピードとか感度設定の新機能は今回試して無いのでよくわかりません。
+
+### Camera2 API はコールバック地獄
+
+Camera2 API ではカメラの初期化に数ステップ、
+さらに撮影で数ステップのコールバックによる非同期処理が必要になります。<br>
+
+整理すると以下のようになります。
+
+  - 初期化
+    - TextureView の準備待
+    - カメラデバイス準備待
+    - キャプチャセッション接続待
+  - 撮影
+    - オートフォーカス待
+    - オート露出待
+    - 画像取得待
+
+そのまま実装するといわいるコールバック地獄になります。<br>
+Googleのサンプルコードからこれを読み取るのに１日かかりました。
+
+### Camera2 API のオリジナルのサンプル
+
+Googleのサンプルを元に最小構成のサンプルを独自に作ってみます。<br>
+簡略化のため以下の機能を削ります。
+
+  - バックグラウンドスレッドと排他制御（全部UIスレッド）
+  - 画面回転対応（縦置固定）
+
+#### 状態遷移マシン
+
+コールバック地獄回避のため状態遷移を導入します。<br>
+Googleのサンプルから読み取った各状態を整理した物が以下になります。
+
+##### 状態遷移図：
+<object data="/2015/05/23/android-camera2-sample.svg" type="image/svg+xml"></object>
+
+##### 状態説明：
+<table class="KTable">
+<tr><th>状態名<th>説明</tr>
+<tr><td>InitSaface<td>TextureViewの初期化。<br>
+- Safaceとして使えるようになるのを待ます。<br>
+- 初期化済の場合はスルー。</tr>
+<tr><td>OpenCamera<td>カメラデバイスの開始。<br>
+- カメラの情報から画像サイズ、プレビューサイズを決定し
+ImageReaderやTexcureViewの設定を行います。</tr>
+<tr><td>CreateSession<td>キャプチャセッションの接続。(補足後述)</tr>
+<tr><td>Preview<td>プレビュー表示中。ここが安定状態となります。</tr>
+<tr><td>AutoFocus<td>オートフォーカス(AF)中。<br>
+- AF要求を発行して焦点が合うまでコールバックを受け続けます。</tr>
+<tr><td>AutoExposure<td>自動露出(AE)調整中。<br>
+- AE要求を発行して露出が合うまでコールバックを受け続けます。</tr>
+<tr><td>TakePicture<td>画像取得中。<br>
+- 撮影要求を発行して完了を待ちます。<br>
+- 結果画像は ImageReader のコールバックに返されます。</tr>
+<tr><td>Abort<td>カメラの終了。全てのリソースを開放します。</tr>
+</table>
+
+キャプチャセッションとは Camera2 API の新しい仕組みでカメラから画像を受け取る為のAPIです。
+これに各種要求を発行して結果をコールバックで貰うのが基本パターンになります。<br>
+詳細は [CameraCaptureSessionクラス](http://developer.android.com/reference/android/hardware/camera2/CameraCaptureSession.html)
+のドキュメントを参照してください。
+
+##### イベント説明：
+<table class="KTable">
+<tr><th>イベント名<th>説明</tr>
+<tr><td>open()<td>カメラの利用開始。通常 onResume() から呼ばれる。</tr>
+<tr><td>close()<td>カメラの利用終了。通常 onParse() から呼ばれる。</tr>
+<tr><td>takePicture()<td>撮影開始。通常シャッターの onClick() から呼ばれる。</tr>
+</table>
+
+
+#### サンプルの実装
+
+完全なソースは GitHub にあります。
+
+  - [https://github.com/kotemaru/androidCamera2Sample](https://github.com/kotemaru/androidCamera2Sample)
+
+##### Camera2StateMachine.java:
+上記、状態遷移図をそのまま実装しただけですが 300行になりました。<br>
+これでもカメラとして機能するための必要最小限です。
+
+	// Copyright 2015 kotemaru.org. (http://www.apache.org/licenses/LICENSE-2.0)
+	package org.kotemaru.android.camera2sample;
+
+	import java.util.Arrays;
+	import java.util.List;
+
+	import android.app.Activity;
+	import android.content.Context;
+	import android.graphics.ImageFormat;
+	import android.graphics.SurfaceTexture;
+	import android.hardware.camera2.CameraAccessException;
+	import android.hardware.camera2.CameraCaptureSession;
+	import android.hardware.camera2.CameraCharacteristics;
+	import android.hardware.camera2.CameraDevice;
+	import android.hardware.camera2.CameraManager;
+	import android.hardware.camera2.CameraMetadata;
+	import android.hardware.camera2.CaptureRequest;
+	import android.hardware.camera2.CaptureResult;
+	import android.hardware.camera2.TotalCaptureResult;
+	import android.hardware.camera2.params.StreamConfigurationMap;
+	import android.media.ImageReader;
+	import android.os.Handler;
+	import android.util.Log;
+	import android.util.Size;
+	import android.view.Surface;
+	import android.view.TextureView;
+
+	public class Camera2StateMachine {
+		private static final String TAG = Camera2StateMachine.class.getSimpleName();
+		private CameraManager mCameraManager;
+
+		private CameraDevice mCameraDevice;
+		private CameraCaptureSession mCaptureSession;
+		private ImageReader mImageReader;
+		private CaptureRequest.Builder mPreviewRequestBuilder;
+
+		private AutoFitTextureView mTextureView;
+		private Handler mHandler = null; // default current thread.
+		private State mState = null;
+		private ImageReader.OnImageAvailableListener mTakePictureListener;
+
+		public void open(Activity activity, AutoFitTextureView textureView) {
+			if (mState != null) throw new IllegalStateException("Alrady started state=" + mState);
+			mTextureView = textureView;
+			mCameraManager = (CameraManager) activity.getSystemService(Context.CAMERA_SERVICE);
+			nextState(mInitSurfaceState);
+		}
+		public boolean takePicture(ImageReader.OnImageAvailableListener listener) {
+			if (mState != mPreviewState) return false;
+			mTakePictureListener = listener;
+			nextState(mAutoFocusState);
+			return true;
+		}
+		public void close() {
+			nextState(mAbortState);
+		}
+
+		// ----------------------------------------------------------------------------------------
+		// The following private
+		private void shutdown() {
+			if (null != mCaptureSession) {
+				mCaptureSession.close();
+				mCaptureSession = null;
+			}
+			if (null != mCameraDevice) {
+				mCameraDevice.close();
+				mCameraDevice = null;
+			}
+			if (null != mImageReader) {
+				mImageReader.close();
+				mImageReader = null;
+			}
+		}
+
+		private void nextState(State nextState) {
+			Log.d(TAG, "state: " + mState + "->" + nextState);
+			try {
+				if (mState != null) mState.finish();
+				mState = nextState;
+				if (mState != null) mState.enter();
+			} catch (CameraAccessException e) {
+				Log.e(TAG, "next(" + nextState + ")", e);
+				shutdown();
+			}
+		}
+
+		private abstract class State {
+			private String mName;
+
+			public State(String name) {
+				mName = name;
+			}
+			//@formatter:off
+			public String toString() {return mName;}
+			public void enter() throws CameraAccessException {}
+			public void onSurfaceTextureAvailable(int width, int height){}
+			public void onCameraOpened(CameraDevice cameraDevice){}
+			public void onSessionConfigured(CameraCaptureSession cameraCaptureSession) {}
+			public void onCaptureResult(CaptureResult result, boolean isCompleted) throws CameraAccessException {}
+			public void finish() throws CameraAccessException {}
+	        //@formatter:on
+		}
+
+		// ===================================================================================
+		// State Definition
+		private final State mInitSurfaceState = new State("InitSurface") {
+			public void enter() throws CameraAccessException {
+				if (mTextureView.isAvailable()) {
+					nextState(mOpenCameraState);
+				} else {
+					mTextureView.setSurfaceTextureListener(mSurfaceTextureListener);
+				}
+			}
+			public void onSurfaceTextureAvailable(int width, int height) {
+				nextState(mOpenCameraState);
+			}
+
+			private final TextureView.SurfaceTextureListener mSurfaceTextureListener = new TextureView.SurfaceTextureListener() {
+				@Override
+				public void onSurfaceTextureAvailable(SurfaceTexture texture, int width, int height) {
+					if (mState != null) mState.onSurfaceTextureAvailable(width, height);
+				}
+				@Override
+				public void onSurfaceTextureSizeChanged(SurfaceTexture texture, int width, int height) {
+					// TODO: ratation changed.
+				}
+				@Override
+				public boolean onSurfaceTextureDestroyed(SurfaceTexture texture) {
+					return true;
+				}
+				@Override
+				public void onSurfaceTextureUpdated(SurfaceTexture texture) {
+				}
+			};
+		};
+		// -----------------------------------------------------------------------------------
+		private final State mOpenCameraState = new State("OpenCamera") {
+			public void enter() throws CameraAccessException {
+				String cameraId = Camera2Util.getCameraId(mCameraManager, CameraCharacteristics.LENS_FACING_BACK);
+				CameraCharacteristics characteristics = mCameraManager.getCameraCharacteristics(cameraId);
+				StreamConfigurationMap map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+
+				mImageReader = Camera2Util.getMaxSizeImageReader(map, ImageFormat.JPEG);
+				Size previewSize = Camera2Util.getBestPreviewSize(map, mImageReader);
+				mTextureView.setPreviewSize(previewSize.getHeight(), previewSize.getWidth());
+
+				mCameraManager.openCamera(cameraId, mStateCallback, mHandler);
+				Log.d(TAG, "openCamera:" + cameraId);
+			}
+			public void onCameraOpened(CameraDevice cameraDevice) {
+				mCameraDevice = cameraDevice;
+				nextState(mCreateSessionState);
+			}
+
+			private final CameraDevice.StateCallback mStateCallback = new CameraDevice.StateCallback() {
+				@Override
+				public void onOpened(CameraDevice cameraDevice) {
+					if (mState != null) mState.onCameraOpened(cameraDevice);
+				}
+				@Override
+				public void onDisconnected(CameraDevice cameraDevice) {
+					nextState(mAbortState);
+				}
+				@Override
+				public void onError(CameraDevice cameraDevice, int error) {
+					Log.e(TAG, "CameraDevice:onError:" + error);
+					nextState(mAbortState);
+				}
+			};
+		};
+		// -----------------------------------------------------------------------------------
+		private final State mCreateSessionState = new State("CreateSession") {
+			public void enter() throws CameraAccessException {
+				mPreviewRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+				SurfaceTexture texture = mTextureView.getSurfaceTexture();
+				texture.setDefaultBufferSize(mTextureView.getPreviewWidth(), mTextureView.getPreviewHeight());
+				Surface surface = new Surface(texture);
+				mPreviewRequestBuilder.addTarget(surface);
+				List<Surface> outputs = Arrays.asList(surface, mImageReader.getSurface());
+				mCameraDevice.createCaptureSession(outputs, mSessionCallback, mHandler);
+			}
+			public void onSessionConfigured(CameraCaptureSession cameraCaptureSession) {
+				mCaptureSession = cameraCaptureSession;
+				nextState(mPreviewState);
+			}
+
+			private final CameraCaptureSession.StateCallback mSessionCallback = new CameraCaptureSession.StateCallback() {
+				@Override
+				public void onConfigured(CameraCaptureSession cameraCaptureSession) {
+					if (mState != null) mState.onSessionConfigured(cameraCaptureSession);
+				}
+				@Override
+				public void onConfigureFailed(CameraCaptureSession cameraCaptureSession) {
+					nextState(mAbortState);
+				}
+			};
+		};
+		// -----------------------------------------------------------------------------------
+		private final State mPreviewState = new State("Preview") {
+			public void enter() throws CameraAccessException {
+				mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
+				mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
+				mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), mCaptureCallback, mHandler);
+			}
+		};
+		private final CameraCaptureSession.CaptureCallback mCaptureCallback = new CameraCaptureSession.CaptureCallback() {
+			@Override
+			public void onCaptureProgressed(CameraCaptureSession session, CaptureRequest request, CaptureResult partialResult) {
+				onCaptureResult(partialResult, false);
+			}
+			@Override
+			public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
+				onCaptureResult(result, true);
+			}
+			private void onCaptureResult(CaptureResult result, boolean isCompleted) {
+				try {
+					if (mState != null) mState.onCaptureResult(result, isCompleted);
+				} catch (CameraAccessException e) {
+					Log.e(TAG, "handle():", e);
+					nextState(mAbortState);
+				}
+			}
+		};
+		// -----------------------------------------------------------------------------------
+		private final State mAutoFocusState = new State("AutoFocus") {
+			public void enter() throws CameraAccessException {
+				mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
+				mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), mCaptureCallback, mHandler);
+			}
+			public void onCaptureResult(CaptureResult result, boolean isCompleted) throws CameraAccessException {
+				Integer afState = result.get(CaptureResult.CONTROL_AF_STATE);
+				boolean isAfReady = afState == null
+						|| afState == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED
+						|| afState == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED;
+				if (isAfReady) {
+					nextState(mAutoExposureState);
+				}
+			}
+		};
+		// -----------------------------------------------------------------------------------
+		private final State mAutoExposureState = new State("AutoExposure") {
+			public void enter() throws CameraAccessException {
+				mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER,
+						CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_START);
+				mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), mCaptureCallback, mHandler);
+			}
+			public void onCaptureResult(CaptureResult result, boolean isCompleted) throws CameraAccessException {
+				Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
+				boolean isAeReady = aeState == null
+						|| aeState == CaptureResult.CONTROL_AE_STATE_CONVERGED
+						|| aeState == CaptureRequest.CONTROL_AE_STATE_FLASH_REQUIRED;
+				if (isAeReady) {
+					nextState(mTakePictureState);
+				}
+			}
+		};
+		// -----------------------------------------------------------------------------------
+		private final State mTakePictureState = new State("TakePicture") {
+			public void enter() throws CameraAccessException {
+				final CaptureRequest.Builder captureBuilder =
+						mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
+				captureBuilder.addTarget(mImageReader.getSurface());
+				captureBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
+				captureBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
+				captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, 90); // portraito
+				mImageReader.setOnImageAvailableListener(mTakePictureListener, mHandler);
+
+				mCaptureSession.stopRepeating();
+				mCaptureSession.capture(captureBuilder.build(), mCaptureCallback, mHandler);
+			}
+			public void onCaptureResult(CaptureResult result, boolean isCompleted) throws CameraAccessException {
+				if (isCompleted) {
+					nextState(mPreviewState);
+				}
+			}
+			public void finish() throws CameraAccessException {
+				mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
+				mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
+				mCaptureSession.capture(mPreviewRequestBuilder.build(), mCaptureCallback, mHandler);
+				mTakePictureListener = null;
+			}
+		};
+		// -----------------------------------------------------------------------------------
+		private final State mAbortState = new State("Abort") {
+			public void enter() throws CameraAccessException {
+				shutdown();
+				nextState(null);
+			}
+		};
+	}
+
+
+
+##### Camera2Util.java:
+ツール化できそうな部分を分離しました。
+
+	package org.kotemaru.android.camera2sample;
+
+	import android.graphics.SurfaceTexture;
+	import android.hardware.camera2.CameraAccessException;
+	import android.hardware.camera2.CameraCharacteristics;
+	import android.hardware.camera2.CameraManager;
+	import android.hardware.camera2.params.StreamConfigurationMap;
+	import android.media.ImageReader;
+	import android.util.Size;
+
+	public class Camera2Util {
+		public static String getCameraId(CameraManager cameraManager, int facing) throws CameraAccessException {
+			for (String cameraId : cameraManager.getCameraIdList()) {
+				CameraCharacteristics characteristics = cameraManager.getCameraCharacteristics(cameraId);
+				if (characteristics.get(CameraCharacteristics.LENS_FACING) == facing) {
+					return cameraId;
+				}
+			}
+			return null;
+		}
+
+		public static ImageReader getMaxSizeImageReader(StreamConfigurationMap map, int imageFormat) throws CameraAccessException {
+			Size[] sizes = map.getOutputSizes(imageFormat);
+			Size maxSize = sizes[0];
+			for (Size size:sizes) {
+				if (size.getWidth() > maxSize.getWidth()) {
+					maxSize = size;
+				}
+			}
+			ImageReader imageReader = ImageReader.newInstance(
+					//maxSize.getWidth(), maxSize.getHeight(), // for landscape.
+					maxSize.getHeight(), maxSize.getWidth(), // for portrait.
+					imageFormat, /*maxImages*/1);
+			return imageReader;
+		}
+
+		public static Size getBestPreviewSize(StreamConfigurationMap map, ImageReader imageSize) throws CameraAccessException {
+			//float imageAspect = (float) imageSize.getWidth() / imageSize.getHeight(); // for landscape.
+			float imageAspect = (float) imageSize.getHeight() / imageSize.getWidth(); // for portrait
+			float minDiff = 1000000000000F;
+			Size[] previewSizes = map.getOutputSizes(SurfaceTexture.class);
+			Size previewSize = previewSizes[0];
+			for (Size size : previewSizes) {
+				float previewAspect = (float) size.getWidth() / size.getHeight();
+				float diff = Math.abs(imageAspect - previewAspect);
+				if (diff < minDiff) {
+					previewSize = size;
+					minDiff = diff;
+				}
+				if (diff == 0.0F) break;
+			}
+			return previewSize;
+		}
+	}
+
+
+##### MainActivity.java:
+状態遷移マシンを使用したカメラActivityです。<br>
+撮影した画像を ImageView で表示します。
+
+	package org.kotemaru.android.camera2sample;
+
+	import java.nio.ByteBuffer;
+
+	import android.app.Activity;
+	import android.graphics.Bitmap;
+	import android.graphics.BitmapFactory;
+	import android.media.Image;
+	import android.media.ImageReader;
+	import android.os.Bundle;
+	import android.view.KeyEvent;
+	import android.view.View;
+	import android.widget.ImageView;
+
+	public class MainActivity extends Activity {
+		private AutoFitTextureView mTextureView;
+		private ImageView mImageView;
+		private Camera2StateMachine mCamera2;
+
+		@Override
+		protected void onCreate(Bundle savedInstanceState) {
+			super.onCreate(savedInstanceState);
+			setContentView(R.layout.activity_main);
+
+			mTextureView = (AutoFitTextureView) findViewById(R.id.TextureView);
+			mImageView = (ImageView) findViewById(R.id.ImageView);
+			mCamera2 = new Camera2StateMachine();
+		}
+
+		@Override
+		protected void onResume() {
+			super.onResume();
+			mCamera2.open(this, mTextureView);
+		}
+		@Override
+		protected void onPause() {
+			mCamera2.close();
+			super.onPause();
+		}
+		@Override
+		public boolean onKeyDown(int keyCode, KeyEvent event) {
+			if (keyCode == KeyEvent.KEYCODE_BACK && mImageView.getVisibility() == View.VISIBLE) {
+				mTextureView.setVisibility(View.VISIBLE);
+				mImageView.setVisibility(View.INVISIBLE);
+				return false;
+			}
+			return super.onKeyDown(keyCode, event);
+		}
+		public void onClickShutter(View view) {
+			mCamera2.takePicture(new ImageReader.OnImageAvailableListener() {
+				@Override
+				public void onImageAvailable(ImageReader reader) {
+					// 撮れた画像をImageViewに貼り付けて表示。
+					final Image image = reader.acquireLatestImage();
+					ByteBuffer buffer = image.getPlanes()[0].getBuffer();
+					byte[] bytes = new byte[buffer.remaining()];
+					buffer.get(bytes);
+					Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+					image.close();
+
+					mImageView.setImageBitmap(bitmap);
+					mImageView.setVisibility(View.VISIBLE);
+					mTextureView.setVisibility(View.INVISIBLE);
+				}
+			});
+		}
+	}
+
+### 実行結果
+
+Nexus5 では問題なく実行できました。<br>
+分かりづらいですが左がプレビュー中で右が撮影した画像をImageViewで表示しているところです。
+
+<table>
+<tr><th>プレビュー中<th>　<th>撮影結果表示中</tr>
+<tr>
+<td><img src="/2015/05/23/android-camera2-sample-1.jpg" />
+<td>
+<td><img src="/2015/05/23/android-camera2-sample-2.jpg" />
+</tr>
+</table>
+
+
+### 所感
+
+最初は戸惑いましたが構造が分かってくるとこちらの方が扱い易い気がしてきました。<br>
+アプリは複雑になりますがカメラ・デバイスを完全に制御できる感じです。
+
+機種依存問題が解決されるのか否かは 5.0 対応機がもう少し増えないと判断できませんが期待したいところです。
+

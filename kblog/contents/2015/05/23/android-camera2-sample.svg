@@ -1,0 +1,181 @@
+<?xml version="1.0" standalone="yes"  ?>
+<svg xml:space="preserve" width="320" height="525"
+ xmlns='http://www.w3.org/2000/svg' 
+viewBox="0 0 320 525">
+<!--
+ This file was made by umled. 
+ It must not be revised with other tools.
+-->
+<!--@set FILE_VERSION 0.3;set PRINT(orientation) portrait-->
+<!-- =============== Cable ================ -->
+<g>
+<!--@set LOAD(I-20) [newItem .can Cable { {x {$LOAD(I-6) x 72.0}} {y {$LOAD(I-6) y end}} {ex {$LOAD(I-8) x 72.0}} {ey {$LOAD(I-8) y 0}} {vx {}} {vy {}} {ltype {9}} {liner {}} {but {}} {vut {[takePicture()]}} {eut {}} {blt {}} {vlt {}} {elt {}} }]-->
+<polyline fill="none" stroke="black"  stroke-width="2.0" points="134.0 234.0 134.0 262.0"  />
+<polyline fill="none" stroke="black"  stroke-width="2.0" points="134.0 262.0 134.0 262.0"  />
+<polyline fill="none" stroke="black"  stroke-width="2.0" points="134.0 262.0 134.0 290.0"  />
+<polygon fill="black" stroke="black"  stroke-width="1.0" points="134.0 290.0 129.0 280.0 134.0 290.0 139.0 280.0" />
+<g>
+ <text x="135" y="267" font-size="12" >[takePicture()]</text>
+</g>
+</g>
+<!-- =============== Cable ================ -->
+<g>
+<!--@set LOAD(I-19) [newItem .can Cable { {x {$LOAD(I-4) x 72.0}} {y {$LOAD(I-4) y end}} {ex {$LOAD(I-6) x 72.0}} {ey {$LOAD(I-6) y 0}} {vx {}} {vy {}} {ltype {9}} {liner {}} {but {}} {vut {}} {eut {}} {blt {}} {vlt {}} {elt {}} }]-->
+<polyline fill="none" stroke="black"  stroke-width="2.0" points="134.0 178.0 134.0 194.0"  />
+<polyline fill="none" stroke="black"  stroke-width="2.0" points="134.0 194.0 134.0 194.0"  />
+<polyline fill="none" stroke="black"  stroke-width="2.0" points="134.0 194.0 134.0 210.0"  />
+<polygon fill="black" stroke="black"  stroke-width="1.0" points="134.0 210.0 129.0 200.0 134.0 210.0 139.0 200.0" />
+</g>
+<!-- =============== State ================ -->
+<g>
+<!--@set LOAD(I-2) [newItem .can State { {x {62.0}} {y {106.0}} {w {144}} {h {26}} {name {OpenCamera}} {attr {}} }]-->
+<polygon fill="white" stroke="black"  stroke-width="2.0" points="67.0 108.0 200.0 108.0 204.0 112.0 204.0 126.0 200.0 130.0 67.0 130.0 63.0 126.0 63.0 112.0" />
+<g>
+ <text x="83" y="124" font-size="12" >OpenCamera</text>
+</g>
+</g>
+<!-- =============== Cable ================ -->
+<g>
+<!--@set LOAD(I-21) [newItem .can Cable { {x {$LOAD(I-8) x 72.0}} {y {$LOAD(I-8) y end}} {ex {$LOAD(I-11) x 72.0}} {ey {$LOAD(I-11) y 0}} {vx {}} {vy {}} {ltype {9}} {liner {}} {but {}} {vut {}} {eut {}} {blt {}} {vlt {}} {elt {}} }]-->
+<polyline fill="none" stroke="black"  stroke-width="2.0" points="134.0 314.0 134.0 324.0"  />
+<polyline fill="none" stroke="black"  stroke-width="2.0" points="134.0 324.0 134.0 324.0"  />
+<polyline fill="none" stroke="black"  stroke-width="2.0" points="134.0 324.0 134.0 334.0"  />
+<polygon fill="black" stroke="black"  stroke-width="1.0" points="134.0 334.0 129.0 324.0 134.0 334.0 139.0 324.0" />
+</g>
+<!-- =============== Cable ================ -->
+<g>
+<!--@set LOAD(I-3) [newItem .can Cable { {x {$LOAD(I-13) x 72.0}} {y {$LOAD(I-13) y end}} {ex {$LOAD(I-14) x 8}} {ey {$LOAD(I-14) y 0}} {vx {}} {vy {}} {ltype {9}} {liner {}} {but {}} {vut {}} {eut {}} {blt {}} {vlt {}} {elt {}} }]-->
+<polyline fill="none" stroke="black"  stroke-width="2.0" points="134.0 462.0 134.0 480.0"  />
+<polyline fill="none" stroke="black"  stroke-width="2.0" points="134.0 480.0 134.0 480.0"  />
+<polyline fill="none" stroke="black"  stroke-width="2.0" points="134.0 480.0 134.0 498.0"  />
+<polygon fill="black" stroke="black"  stroke-width="1.0" points="134.0 498.0 129.0 488.0 134.0 498.0 139.0 488.0" />
+</g>
+<!-- =============== State ================ -->
+<g>
+<!--@set LOAD(I-4) [newItem .can State { {x {62.0}} {y {154.0}} {w {144}} {h {26}} {name {CreateSession}} {attr {}} }]-->
+<polygon fill="white" stroke="black"  stroke-width="2.0" points="67.0 156.0 200.0 156.0 204.0 160.0 204.0 174.0 200.0 178.0 67.0 178.0 63.0 174.0 63.0 160.0" />
+<g>
+ <text x="79" y="172" font-size="12" >CreateSession</text>
+</g>
+</g>
+<!-- =============== Cable ================ -->
+<g>
+<!--@set LOAD(I-23) [newItem .can Cable { {x {$LOAD(I-11) x 72.0}} {y {$LOAD(I-11) y end}} {ex {$LOAD(I-12) x 72.0}} {ey {$LOAD(I-12) y 0}} {vx {}} {vy {}} {ltype {9}} {liner {}} {but {}} {vut {}} {eut {}} {blt {}} {vlt {}} {elt {}} }]-->
+<polyline fill="none" stroke="black"  stroke-width="2.0" points="134.0 358.0 134.0 370.0"  />
+<polyline fill="none" stroke="black"  stroke-width="2.0" points="134.0 370.0 134.0 370.0"  />
+<polyline fill="none" stroke="black"  stroke-width="2.0" points="134.0 370.0 134.0 382.0"  />
+<polygon fill="black" stroke="black"  stroke-width="1.0" points="134.0 382.0 129.0 372.0 134.0 382.0 139.0 372.0" />
+</g>
+<!-- =============== Cable ================ -->
+<g>
+<!--@set LOAD(I-5) [newItem .can Cable { {x {$LOAD(I-6) x end}} {y {$LOAD(I-6) y 16.0}} {ex {$LOAD(I-13) x end}} {ey {$LOAD(I-13) y 16.0}} {vx {$LOAD(I-7) x 0}} {vy {$LOAD(I-7) y 0}} {ltype {9}} {liner {}} {but {}} {vut {[close()]}} {eut {}} {blt {}} {vlt {}} {elt {}} }]-->
+<polyline fill="none" stroke="black"  stroke-width="2.0" points="206.0 226.0 254.0 226.0"  />
+<polyline fill="none" stroke="black"  stroke-width="2.0" points="254.0 226.0 254.0 454.0"  />
+<polyline fill="none" stroke="black"  stroke-width="2.0" points="254.0 454.0 206.0 454.0"  />
+<polygon fill="black" stroke="black"  stroke-width="1.0" points="206.0 454.0 216.0 449.0 206.0 454.0 216.0 459.0" />
+<g>
+ <text x="255" y="345" font-size="12" >[close()]</text>
+</g>
+</g>
+<!-- =============== State ================ -->
+<g>
+<!--@set LOAD(I-24) [newItem .can State { {x {62.0}} {y {58.0}} {w {144}} {h {26}} {name {InitSaface}} {attr {}} }]-->
+<polygon fill="white" stroke="black"  stroke-width="2.0" points="67.0 60.0 200.0 60.0 204.0 64.0 204.0 78.0 200.0 82.0 67.0 82.0 63.0 78.0 63.0 64.0" />
+<g>
+ <text x="96" y="76" font-size="12" >InitSaface</text>
+</g>
+</g>
+<!-- =============== State ================ -->
+<g>
+<!--@set LOAD(I-6) [newItem .can State { {x {62.0}} {y {210.0}} {w {144}} {h {26}} {name {Preview}} {attr {}} }]-->
+<polygon fill="white" stroke="black"  stroke-width="2.0" points="67.0 212.0 200.0 212.0 204.0 216.0 204.0 230.0 200.0 234.0 67.0 234.0 63.0 230.0 63.0 216.0" />
+<g>
+ <text x="104" y="228" font-size="12" >Preview</text>
+</g>
+</g>
+<!-- =============== Point ================ -->
+<g>
+<!--@set LOAD(I-7) [newItem .can Point { {x {254.0}} {y {306.0}} {w {0}} {h {0}} {pos {}} {text {}} }]-->
+</g>
+<!-- =============== State ================ -->
+<g>
+<!--@set LOAD(I-8) [newItem .can State { {x {62.0}} {y {290.0}} {w {144}} {h {26}} {name {AutoFocus}} {attr {}} }]-->
+<polygon fill="white" stroke="black"  stroke-width="2.0" points="67.0 292.0 200.0 292.0 204.0 296.0 204.0 310.0 200.0 314.0 67.0 314.0 63.0 310.0 63.0 296.0" />
+<g>
+ <text x="93" y="308" font-size="12" >AutoFocus</text>
+</g>
+</g>
+<!-- =============== IF ================ -->
+<g>
+<!--@set LOAD(I-10) [newItem .can IF { {x {126.0}} {y {14.0}} {w {16}} {h {16}} {pos {}} {text {}} }]-->
+<ellipse cx="134.0" cy="22.0" rx="8.0" ry="8.0" fill="white" stroke="black" stroke-width="2.0" />
+</g>
+<!-- =============== State ================ -->
+<g>
+<!--@set LOAD(I-11) [newItem .can State { {x {62.0}} {y {334.0}} {w {144}} {h {26}} {name {AutoExposure}} {attr {}} }]-->
+<polygon fill="white" stroke="black"  stroke-width="2.0" points="67.0 336.0 200.0 336.0 204.0 340.0 204.0 354.0 200.0 358.0 67.0 358.0 63.0 354.0 63.0 340.0" />
+<g>
+ <text x="81" y="352" font-size="12" >AutoExposure</text>
+</g>
+</g>
+<!-- =============== State ================ -->
+<g>
+<!--@set LOAD(I-12) [newItem .can State { {x {62.0}} {y {382.0}} {w {144}} {h {26}} {name {TakePicture}} {attr {}} }]-->
+<polygon fill="white" stroke="black"  stroke-width="2.0" points="67.0 384.0 200.0 384.0 204.0 388.0 204.0 402.0 200.0 406.0 67.0 406.0 63.0 402.0 63.0 388.0" />
+<g>
+ <text x="89" y="400" font-size="12" >TakePicture</text>
+</g>
+</g>
+<!-- =============== State ================ -->
+<g>
+<!--@set LOAD(I-13) [newItem .can State { {x {62.0}} {y {438.0}} {w {144}} {h {26}} {name {Abort}} {attr {}} }]-->
+<polygon fill="white" stroke="black"  stroke-width="2.0" points="67.0 440.0 200.0 440.0 204.0 444.0 204.0 458.0 200.0 462.0 67.0 462.0 63.0 458.0 63.0 444.0" />
+<g>
+ <text x="113" y="456" font-size="12" >Abort</text>
+</g>
+</g>
+<!-- =============== IF ================ -->
+<g>
+<!--@set LOAD(I-14) [newItem .can IF { {x {126.0}} {y {498.0}} {w {16}} {h {16}} {pos {}} {text {}} }]-->
+<ellipse cx="134.0" cy="506.0" rx="8.0" ry="8.0" fill="white" stroke="black" stroke-width="2.0" />
+</g>
+<!-- =============== Cable ================ -->
+<g>
+<!--@set LOAD(I-15) [newItem .can Cable { {x {$LOAD(I-10) x 8}} {y {$LOAD(I-10) y end}} {ex {$LOAD(I-24) x 72.0}} {ey {$LOAD(I-24) y 0}} {vx {}} {vy {}} {ltype {9}} {liner {}} {but {}} {vut {[open()]}} {eut {}} {blt {}} {vlt {}} {elt {}} }]-->
+<polyline fill="none" stroke="black"  stroke-width="2.0" points="134.0 30.0 134.0 44.0"  />
+<polyline fill="none" stroke="black"  stroke-width="2.0" points="134.0 44.0 134.0 44.0"  />
+<polyline fill="none" stroke="black"  stroke-width="2.0" points="134.0 44.0 134.0 58.0"  />
+<polygon fill="black" stroke="black"  stroke-width="1.0" points="134.0 58.0 129.0 48.0 134.0 58.0 139.0 48.0" />
+<g>
+ <text x="135" y="49" font-size="12" >[open()]</text>
+</g>
+</g>
+<!-- =============== Cable ================ -->
+<g>
+<!--@set LOAD(I-17) [newItem .can Cable { {x {$LOAD(I-24) x 72.0}} {y {$LOAD(I-24) y end}} {ex {$LOAD(I-2) x 72.0}} {ey {$LOAD(I-2) y 0}} {vx {}} {vy {}} {ltype {9}} {liner {}} {but {}} {vut {}} {eut {}} {blt {}} {vlt {}} {elt {}} }]-->
+<polyline fill="none" stroke="black"  stroke-width="2.0" points="134.0 82.0 134.0 94.0"  />
+<polyline fill="none" stroke="black"  stroke-width="2.0" points="134.0 94.0 134.0 94.0"  />
+<polyline fill="none" stroke="black"  stroke-width="2.0" points="134.0 94.0 134.0 106.0"  />
+<polygon fill="black" stroke="black"  stroke-width="1.0" points="134.0 106.0 129.0 96.0 134.0 106.0 139.0 96.0" />
+</g>
+<!-- =============== Point ================ -->
+<g>
+<!--@set LOAD(I-0) [newItem .can Point { {x {30.0}} {y {286.0}} {w {0}} {h {0}} {pos {}} {text {}} }]-->
+</g>
+<!-- =============== Cable ================ -->
+<g>
+<!--@set LOAD(I-18) [newItem .can Cable { {x {$LOAD(I-2) x 72.0}} {y {$LOAD(I-2) y end}} {ex {$LOAD(I-4) x 72.0}} {ey {$LOAD(I-4) y 0}} {vx {}} {vy {}} {ltype {9}} {liner {}} {but {}} {vut {}} {eut {}} {blt {}} {vlt {}} {elt {}} }]-->
+<polyline fill="none" stroke="black"  stroke-width="2.0" points="134.0 130.0 134.0 142.0"  />
+<polyline fill="none" stroke="black"  stroke-width="2.0" points="134.0 142.0 134.0 142.0"  />
+<polyline fill="none" stroke="black"  stroke-width="2.0" points="134.0 142.0 134.0 154.0"  />
+<polygon fill="black" stroke="black"  stroke-width="1.0" points="134.0 154.0 129.0 144.0 134.0 154.0 139.0 144.0" />
+</g>
+<!-- =============== Cable ================ -->
+<g>
+<!--@set LOAD(I-1) [newItem .can Cable { {x {$LOAD(I-12) x 0}} {y {$LOAD(I-12) y 12.0}} {ex {$LOAD(I-6) x 0}} {ey {$LOAD(I-6) y 16.0}} {vx {$LOAD(I-0) x 0}} {vy {$LOAD(I-0) y 0}} {ltype {9}} {liner {}} {but {}} {vut {}} {eut {}} {blt {}} {vlt {}} {elt {}} }]-->
+<polyline fill="none" stroke="black"  stroke-width="2.0" points="62.0 394.0 30.0 394.0"  />
+<polyline fill="none" stroke="black"  stroke-width="2.0" points="30.0 394.0 30.0 226.0"  />
+<polyline fill="none" stroke="black"  stroke-width="2.0" points="30.0 226.0 62.0 226.0"  />
+<polygon fill="black" stroke="black"  stroke-width="1.0" points="62.0 226.0 52.0 221.0 62.0 226.0 52.0 231.0" />
+</g>
+</svg>
