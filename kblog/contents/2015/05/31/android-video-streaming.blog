@@ -1,0 +1,278 @@
+Subject: Androidの動画ストリーミング配信
+Content-type: markdown/text
+Tags: Android
+Date: 2015/05/31
+Public: yes
+
+思う所有ってAndroidで動画のストリーミング配信を受ける方法を調べで見た。
+
+### ストリーミング配信のプロトコル
+
+ストリーミング配信で使われるプロトコルとAndroidの対応状況は以下となる。
+
+<table class="KTable">
+<tr><th>プロトコル<th>Androidサポート</tr>
+<tr><td>RTSP<td>◯</tr>
+<tr><td>RTMP<td>ライブラリ(Vitamio)</tr>
+<tr><td>HLS<td>Android/3.0以降</tr>
+</table>
+
+Vitamio は個人利用はフリーで法人は有料。
+完全にフリーなライブラリもあるかもしれないが調べていない。
+
+### サーバ
+
+フリーのサーバは２つ見つけた。
+
+  - [Darwin Streaming Server](http://dss.macosforge.org/)
+    - Apple の QuickTime 用のサーバが OSS になったものらしい。
+  - [Red5](https://github.com/Red5)
+    - Javaで記述されている。
+    - ニコ動でも採用されているらしい。
+
+最初、Darwin を試したのだがなんと Yosemite では動かないらしい。
+Ubuntu でビルドしてみたが途中で失敗する。
+
+諦めて Red5 を試してみる。
+こちらはあっさり動作した。
+但し、サイト引越し中なのか情報源のリンク切れが多くちょっと困った。今回はこちらを採用。
+
+### Red5 のインストール
+
+以下から最新のバイナリをDLする。
+
+  - [https://github.com/Red5/red5-server/releases/tag/v1.0.5-RELEASE](https://github.com/Red5/red5-server/releases/tag/v1.0.5-RELEASE)
+    - red5-server-1.0.5-RELEASE-server.zip
+
+ZIP を展開してできたフォルダの red5.bat を実行する。<br>
+これでサーバは起動する。<br>
+バッチでエラーが出る場合は、red5.bat に以下の修正を入れてみる。
+
+	"%JAVA_HOME%\bin\java" %JAVA_OPTS% -cp "%RED5_CLASSPATH%" %RED5_MAINCLASS% %RED5_OPTS%
+	     ↓
+	%JAVA_HOME%\bin\java %JAVA_OPTS% -cp "%RED5_CLASSPATH%" %RED5_MAINCLASS% %RED5_OPTS%
+
+ファイヤーウォールのポート使用確認ダイアログが出たら許可する。
+
+#### Red5デモアプリの準備
+
+Red5 起動後、ブラウザで http://localhost:5080/ を開くと以下の画面が表示されるので下の方に有る
+
+  - Install a ready-made application
+
+をクリックする。
+
+<img src="/2015/05/31/android-video-streaming-1.png" width="500"/>
+
+アプリケーションの一覧から OFLA Demo を選択し「Install」をクリックする。
+
+<img src="/2015/05/31/android-video-streaming-2.png" width="500"/>
+
+デモアプリインストール後にブラウザで http://localhost:5080/oflaDemo/ を開くとデモの動画が再生される。
+
+<img src="/2015/05/31/android-video-streaming-3.jpg" width="500"/>
+
+これでサーバ側の準備は完了。
+
+動画を追加する場合には webapps/アプリ/streams の配下に置くだけで良い。
+
+<img src="/2015/05/31/android-video-streaming-4.png" width="500"/>
+
+
+### Androidクライアントアプリ
+
+Red5 はプラグインを入れないと RTMP しかサポートしないので Vitamio ライブラリを使用する事にした。
+
+Vitamio は初期化以外は標準の VideoView/MediaPlayer と互換 API なので非常に扱いやすい。<br>
+ライブラリ・プロジェクトは以下から取得できる。
+
+  - [https://github.com/yixia/VitamioBundle](https://github.com/yixia/VitamioBundle)
+
+Android studio 用のプロジェクトなので Eclipse の場合は自力で変換する必要がある。<br>
+簡単に方法を書いておくと
+
+  - 上記リポジトリをZIPでDLしてくる。
+  - Android ライブラリプロジェクトを新規作成。
+  - ZIPから src,res,libs,AndroidManifest.xml,proguard-project.txt,project.properties をコピー
+  - 新規作成の時に自動生成された不要ファイルを削除。
+
+で行けるはず。
+
+実装コードは以下のようになる。
+
+  - プロジェクト全体は [https://github.com/kotemaru/androidVitamioSample](https://github.com/kotemaru/androidVitamioSample)
+
+##### MainActivity.java:
+
+	package org.kotemaru.android.rtmpclient;
+
+	import io.vov.vitamio.LibsChecker;
+	import io.vov.vitamio.MediaPlayer;
+	import io.vov.vitamio.MediaPlayer.OnBufferingUpdateListener;
+	import io.vov.vitamio.MediaPlayer.OnInfoListener;
+	import io.vov.vitamio.widget.MediaController;
+	import io.vov.vitamio.widget.VideoView;
+	import android.app.Activity;
+	import android.content.Intent;
+	import android.os.Bundle;
+	import android.util.Log;
+	import android.view.View;
+	import android.widget.ProgressBar;
+
+	public class MainActivity extends Activity {
+		private final static String KEY_POSITION = "KEY_POSITION";
+
+		private VideoView mVideoView;
+		private PlayerListener mPlayerListener;
+		private ProgressBar mProgressBar;
+		private long mPosition = 0; // ms
+
+		@Override
+		protected void onCreate(Bundle savedInstanceState) {
+			super.onCreate(savedInstanceState);
+			if (!LibsChecker.checkVitamioLibs(this)) return; // ※Vitamio で必須
+
+			setContentView(R.layout.activity_main);
+
+			mVideoView = (VideoView) findViewById(R.id.videoView);
+			mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
+			mPlayerListener = new PlayerListener();
+
+			mVideoView.setOnInfoListener(mPlayerListener);
+			mVideoView.setOnBufferingUpdateListener(mPlayerListener);
+			mVideoView.setMediaController(new MediaController(this));
+
+			if (savedInstanceState != null) {
+				mPosition = savedInstanceState.getLong(KEY_POSITION);
+			}
+		}
+
+		@Override
+		protected void onNewIntent(Intent intent) {
+			super.onNewIntent(intent);
+			setIntent(intent);
+		}
+
+		@Override
+		protected void onResume() {
+			super.onResume();
+			Intent intent = getIntent();
+			String path = intent.getDataString();
+			Log.d("DEBUG", "path=" + path);
+			if (path == null) return;
+			mVideoView.setVideoPath(path);
+			mVideoView.requestFocus();
+			mVideoView.seekTo(mPosition);
+			mVideoView.start();
+		}
+
+		@Override
+		protected void onSaveInstanceState(Bundle outState) {
+			super.onSaveInstanceState(outState);
+			outState.putLong(KEY_POSITION, mVideoView.getCurrentPosition());
+		}
+
+		private class PlayerListener implements OnInfoListener, OnBufferingUpdateListener {
+			@Override
+			public boolean onInfo(MediaPlayer mp, int what, int extra) {
+				switch (what) {
+				case MediaPlayer.MEDIA_INFO_BUFFERING_START:
+					if (mVideoView.isPlaying()) {
+						mVideoView.pause();
+						mProgressBar.setVisibility(View.VISIBLE);
+					}
+					break;
+				case MediaPlayer.MEDIA_INFO_BUFFERING_END:
+					mVideoView.start();
+					mProgressBar.setVisibility(View.INVISIBLE);
+					break;
+				case MediaPlayer.MEDIA_INFO_DOWNLOAD_RATE_CHANGED:
+					break;
+				}
+				return true;
+			}
+			@Override
+			public void onBufferingUpdate(MediaPlayer mp, int percent) {
+				Log.d("DEBUG", "buff=" + percent);
+			}
+		}
+	}
+
+
+##### AndroidManifest.xml:
+
+	<?xml version="1.0" encoding="utf-8"?>
+	<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+		package="org.kotemaru.android.rtmpclient" android:versionCode="1" android:versionName="1.0">
+
+		<uses-sdk android:minSdkVersion="14" android:targetSdkVersion="15" />
+		<uses-permission android:name="android.permission.WAKE_LOCK" />
+		<uses-permission android:name="android.permission.INTERNET" />
+		<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+		<application android:allowBackup="true" android:icon="@drawable/ic_launcher"
+			android:label="@string/app_name" android:theme="@style/AppTheme">
+			<activity android:name=".MainActivity" android:label="@string/app_name" android:launchMode="singleTop">
+				<intent-filter>
+					<action android:name="android.intent.action.MAIN" />
+
+					<category android:name="android.intent.category.LAUNCHER" />
+				</intent-filter>
+				<intent-filter>
+					<action android:name="android.intent.action.VIEW" />
+					<category android:name="android.intent.category.DEFAULT" />
+					<category android:name="android.intent.category.BROWSABLE" />
+					<data android:scheme="rtmp" />
+				</intent-filter>
+			</activity>
+			<!-- ※Vitamio で必須 -->
+			<activity android:name="io.vov.vitamio.activity.InitActivity"
+				android:configChanges="orientation|screenSize|smallestScreenSize|keyboard|keyboardHidden|navigation"
+				android:launchMode="singleTop" android:theme="@android:style/Theme.NoTitleBar"
+				android:windowSoftInputMode="stateAlwaysHidden" />
+		</application>
+	</manifest>
+
+
+特殊なのは LibsChecker.checkVitamioLibs() の呼び出しと io.vov.vitamio.activity.InitActivity の宣言が必要になることだけ。
+
+### 実行
+
+アプリ起動用のHTMLファイルを用意する。
+
+##### red5-server-1.0.5-RELEASE/webapps/oflaDemo/test.html:
+
+	<ul>
+	<li><a href="rtmp://192.168.0.9/oflaDemo/Avengers2.mp4">Avengers2</a>
+	<li><a href="rtmp://192.168.0.9/oflaDemo/test.mp4">test</a>
+	<li><a href="rtmp://192.168.0.9/oflaDemo/test2.mp4">test2</a>
+	</ul>
+
+  - 192.168.0.9 は Red5 のIPアドレス。
+
+#### 実行結果
+
+Androidのブラウザから http://192.168.0.9:5080/oflaDemo/test.html を開く。
+
+<img src="/2015/05/31/android-video-streaming-5.png"/>
+
+「Avengers2」をタップすると再生アプリが起動する。
+<table><tr>
+<td><img src="/2015/05/31/android-video-streaming-6.png"/>
+<td>…＞
+<td><img src="/2015/05/31/android-video-streaming-7.jpg"/>
+</tr></table>
+ちょっと待たされて再生成功。
+
+### 所感
+
+まずサーバの準備が思いの外大変。<br>
+Darwin が動かなくて困ったが結果的には Red5 の方が自分で手を入れられて使い勝手良さそう。
+
+それと、プロトコルが色々有ると思っていなかった。<br>
+RTSP は時代遅れっぽいが HLS はスマホの主流と目されているようなので次は HLS を試してみたいなーと思っている。
+
+
+
+
+
+
