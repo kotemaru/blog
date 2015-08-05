@@ -1,0 +1,95 @@
+Subject: Android Studio のカスタマイズ
+Content-type: markdown/text
+Tags: Android
+Date: 2015/08/05
+Public: no
+
+
+ADT 終了のお知らせが Google から出たので仕方なく Android Studio を使ってみている。<br>
+いろいろ操作に戸惑うのでカスタマイズをメモ。
+
+
+### お勧めのエラー対処方の表示
+
+Eclipseではマウスオーバーだが Studio では ALT+Enter。<br>
+マウスオーバーはキーバインドできないので中ボタンに割り当てる。
+
+  1. Settings の Keymap へ移動
+  2. 「Show Intention Actions」を検索
+  2. 鉛筆のメニューから「Add Mouse shortcut」を選択して設定ダイアログ
+  3. マウスアイコンの上で中ボタンをクリック
+
+### エディタ設定
+
+#### 行番号と空白の表示
+
+デフォルトで行番号も空白も表示されないのは Eclipse と同じ。<br>
+改行の表示方法が不明。
+
+  1. Settings の Editor > General > Apprearaaance へ移動
+  2. 「Show line numers」と「Show white space」をチェック
+
+#### フォントの変更
+
+スキーマを作らないと変更できない？<br>
+Windows10 だと Source code pro が選択できたので設定しておいた。
+
+  1. Settings の Editor > Colors&Fonts > Font へ移動
+  2. 「Save As...」ボタンで新しいスキーマを作る。
+  3. 「Show only monospaced fonts」をチェックしてフォントを選ぶ。
+  4. 「Line Spaceng」はフォントにより 0.8～0.9 くらいが良い
+
+#### コンテキストメニュー
+
+エディタの右クリックメニューによく使う機能だけを割り当てた。<br>
+メニューの編集機能が恐ろしく使いずらい。
+
+  1. Settings の Appearance & Behavior > Menus and Toolbars へ移動
+  2. 「Editor Popup Menu」を開いて内容を右側のボタンで編集
+
+作ったメニュー
+
+	Declaration
+	Call hierarchy
+	Super Method
+	Implements
+	---
+	Generate
+	Toggle Case
+	Rename
+	---
+	Cut
+	Copy
+	Peast
+
+削除した項目の「Column Selection mode」は Toolar の Paste の後ろに追加する。
+
+参考、機能一覧：[http://gihyo.jp/dev/serial/01/android_studio/0022](http://gihyo.jp/dev/serial/01/android_studio/0022)
+
+
+### コード・フォーマッタ
+
+Eclipse Code Formatter プラグインを入れて Eclipse の設定を流用する。<br>
+移行プロジェクトだと差分出ちゃうから必須。
+
+  1. settings の Plugins へ移動。
+  2. 「Browse repositories」ボタンをクリック
+  3. 「Eclipse Code Formatter」を検索してインストール
+  4. settings の Other Settings > Eclipse Code Formatter へ移動
+  5. 「Use the Eclipse code fomtter」をチェック
+  6. 「Eclipse Java formatter config file」にエクスポートした定義ファイルを設定する。
+
+
+### その他
+
+使ってると色々出てくるから都度追加。
+
+
+### 雑感
+
+途中で気が付いたのでが Studio って Android 以外のプロジェクトって作れないのね。<br>
+GAE のサポートはあるみたいだけど Tomcat は結局 Eclipse が必要。<br>
+IntelliJ も無料版はサーバ開発できないみたいだし。
+
+Eclipse+Gradle ではダメだったんだろうか？
+
