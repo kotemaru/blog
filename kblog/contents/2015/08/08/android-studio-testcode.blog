@@ -1,0 +1,169 @@
+Subject: Android Studio で自動化テスト
+Content-type: markdown/text
+Tags: Android
+Date: 2015/08/08
+Public: yes
+
+
+Android Studio でテストコードを実行する方法をまとめておく。
+
+  * Android Studio 1.3 が対象。
+
+### 準備
+
+古い解説サイトを見ると build.gradle の変更が必要と書いてあるが 1.3 では不要。<br>
+プロジェクト生成時に src/androidTest フォルダが作成されていてすぐにテストコードが書けるようになっている。
+
+メニューの Run > Edit Configrations を選択して Android Tests を追加すれば準備完了。
+
+<img src="/2015/08/08/android-studio-testcode-1.png" />
+
+<img src="/2015/08/08/android-studio-testcode-2.png" width="550px" />
+
+<img src="/2015/08/08/android-studio-testcode-3.png" width="550px" />
+
+テスト実行環境設定で変更する項目は３つ
+
+  * テストの名前
+  * Module は通常 App
+  * デバイスは選択にしといたほうがよさげ
+
+<img src="/2015/08/08/android-studio-testcode-8.png"  width="550px" />
+
+### テストコード
+
+これは Eclipse と変わらない。
+
+#### 単純な Activity テストのサンプル
+
+	package org.kotemaru.test1;
+
+	import android.test.ActivityUnitTestCase;
+	import android.util.Log;
+	import android.view.View;
+	import android.widget.TextView;
+
+	public class MainActivityTest extends ActivityUnitTestCase<MainActivity> {
+
+	    public MainActivityTest(Class<MainActivity> activityClass) {
+	        super(activityClass);
+	    }
+
+	    // ボタンクリックのテスト
+	    public void test_onTestClick() throws Exception {
+	        Log.v("test", "test_onTestClick");
+	        assertEquals("Hello world!", getText(R.id.textView));
+	        click(R.id.testButton);
+	        assertEquals("Test message!", getText(R.id.textView));
+	    }
+
+	    //-----------------------------------------------------------------
+	    // Util
+	    private void click(int rid) {
+	        final View view = getActivity().findViewById(rid);
+	        getInstrumentation().runOnMainSync(new Runnable() {
+	            @Override
+	            public void run() {
+	                view.performClick();
+	            }
+	        });
+	    }
+
+	    private CharSequence getText(int rid) {
+	        return ((TextView) getActivity().findViewById(rid)).getText();
+	    }
+	}
+
+#### 複数の Activity 遷移のサンプル
+
+	package org.kotemaru.test1;
+
+	import android.app.Activity;
+	import android.app.Instrumentation;
+	import android.content.Intent;
+	import android.test.ActivityTestCase;
+	import android.test.ActivityUnitTestCase;
+	import android.util.Log;
+	import android.view.KeyEvent;
+	import android.view.View;
+	import android.widget.TextView;
+
+	public class MultiActivityTest extends ActivityTestCase {
+	    @Override
+	    protected void setUp() throws Exception {
+	        super.setUp();
+	        Intent intent = new Intent(Intent.ACTION_MAIN);
+	        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+	        intent.setClassName("org.kotemaru.test1", MainActivity.class.getName());
+	        Activity act = getInstrumentation().startActivitySync(intent);
+	        setActivity(act);
+	    }
+
+	    /**
+	     * Main->Sub->Main の Activity 遷移のテスト
+	     */
+	    public void test_onSubActivityClick() throws Exception {
+	        Log.v("test", "test_onSubActivityClick");
+	        Instrumentation instrumentation = getInstrumentation();
+	        Instrumentation.ActivityMonitor monitor =
+	                instrumentation.addMonitor(SubActivity.class.getCanonicalName(), null, false);
+
+	        click(R.id.subActivityButton);
+	        Activity act = instrumentation.waitForMonitorWithTimeout(monitor, 10000);
+	        assertEquals(SubActivity.class, act.getClass());
+
+	        monitor = instrumentation.addMonitor(MainActivity.class.getCanonicalName(), null, false);
+	        Thread.sleep(1000); // TODO: wait activity resumed
+	        sendKeys(KeyEvent.KEYCODE_BACK);
+
+	        act = instrumentation.waitForMonitorWithTimeout(monitor, 10000);
+	        assertEquals(MainActivity.class, act.getClass());
+	    }
+
+	    //-----------------------------------------------------------------
+	    // Util
+	    private void click(int rid) {
+	        final View view = getActivity().findViewById(rid);
+	        getInstrumentation().runOnMainSync(new Runnable() {
+	            @Override
+	            public void run() {
+	                view.performClick();
+	            }
+	        });
+	    }
+
+	    private CharSequence getText(int rid) {
+	        return ((TextView) getActivity().findViewById(rid)).getText();
+	    }
+	}
+
+### 実行
+
+実行の種類を test に変更して実行するだけ。
+
+<img src="/2015/08/08/android-studio-testcode-4.png" />
+
+デバイスの選択画面がでるのでエミュレータか実機を選択。
+
+<img src="/2015/08/08/android-studio-testcode-5.png" width="66%" />
+
+エミュレータで自動でテストが進む。
+
+<img src="/2015/08/08/android-studio-testcode-6.png" width="550px" />
+
+失敗するとスタックトレースがでるので当該の assert に飛ぶことができる。
+
+<a href="/2015/08/08/android-studio-testcode-7.png" title="クリックで拡大"
+><img src="/2015/08/08/android-studio-testcode-7.png" width="550px" /></a>
+
+### まとめ
+
+余計な手間がなく目的のテストコードだけ書けば良いようになっている。
+
+操作系のユーティリティが必要だなと思ったら robotium というのが既にあるらしい。
+
+  * [https://code.google.com/p/robotium/](https://code.google.com/p/robotium/)
+
+問題は UI の仕様変更は頻繁なのでテストが追従できないことなんだよねー。
+
+
