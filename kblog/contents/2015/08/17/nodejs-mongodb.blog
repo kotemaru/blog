@@ -1,0 +1,236 @@
+Subject: Node.js と MongoDB の開発環境構築メモ
+Content-type: markdown/text
+Tags: javascript,Node.js,MongoDB
+Date: 2015/08/17
+Public: no
+
+
+最近流行りの Node.js と MongoDB の組み合わせで開発環境を作ったメモ。
+
+### DLとインストール
+
+#### Node.js
+
+Node.js の本体。
+
+  - https://nodejs.org/download/
+    - Installer を選択
+    - Binary は Node.exe だけで npm が無い
+
+インストールはインストーラに従えばOK。
+
+#### Eclipse プラグイン
+
+nodeclips という プラグインをインストールする。<br>
+express というフレームワークも一緒に入る。
+
+  - http://dl.bintray.com/nodeclipse/nodeclipse/
+    - とりあえず配下全部
+
+プラグイン、インストール後に環境設定が必要。
+
+<img src="/2015/08/17/nodejs-mongodb-1.png" width="550px"/>
+
+注：node.exe以外はデフォルトの設定を使うこと。
+
+#### MongoDB
+
+MongoDB 本体はDLしてインストールするだけ。
+
+  - https://www.mongodb.org/downloads
+    - OS は 2008 R2+ にした
+
+
+MongoDB の教本（通称：薄い本）のPDFをDLして一読しておく。
+
+  - 日本語訳：[https://github.com/hamano/the-little-mongodb-book](https://github.com/hamano/the-little-mongodb-book)
+
+
+### プロジェクトの作成
+
+素の Node.js プロジェクトと Expless フレームワークのプロジェクトが作れるが今回は Express プロジェクトを作成する。<br>
+Express は Node.js を HTTP サーバとするためのフレームワーク。
+
+  - メニューから 「新規 > プロジェクト > その他 > ノード > Node Express Project」 を選択。
+  - テンプレートエンジンは好きなほうを選択
+    - jade はHTML省略記法、ejs はJSPライクな感じ
+
+
+作成されたプロジェクトの構成は以下
+
+  - public/**  : 静的なHTMLファイル
+  - routes/**  : JSのロジック
+  - views/**   : テンプレート
+  - app.js   : アプリのメイン
+  - package.json : アプリの定義ファイル
+
+app.js のメニューから 「実行 > Node Application」 でアプリが起動する。<br>
+ブラウザから http://localhost:3000 にアクセスして Welcom ページが表示されればOK。
+
+
+### Node.js と MongoDB の接続
+
+
+#### MongoDB サーバの起動
+
+mongod.exe を実行するだけでサーバは起動するが
+WindowsだとDBフォルダのドライブ指定を明示したほうが良いので起動バッチを作成する。
+
+boot-mongod.bat: サーバ起動用
+
+	set BASEDIR=%~dp0
+	cd /d %BASEDIR%
+	%BASEDIR%\Server\3.1\bin\mongod.exe --dbpath %BASEDIR%\DB
+
+clinet-mongo.bat: シェル起動用
+
+	set BASEDIR=%~dp0
+	cd /d %BASEDIR%
+	%BASEDIR%\Server\3.1\bin\mongo.exe
+
+
+クライアントのシェルを起動して繋がればOK。
+
+
+#### ドライバの準備
+
+ドライバは Node.js のプラグイン 'mongodb' を使用する。
+
+  - 参考： http://mongodb.github.io/node-mongodb-native/2.0/
+
+package.json の dependencies に "mongodb" を追加する。
+
+	{
+	  "name": "node-ex-test",
+	  "version": "0.0.1",
+	  "private": true,
+	  "scripts": {
+	    "start": "node app.js"
+	  },
+	  "dependencies": {
+	    "express": "3.2.6",
+	    "jade": "*",
+	    "mongodb": "*"     <--これ追加
+	  }
+	}
+
+メニューから「実行 > npm install」を行うとmongodbのドライバがDLされる。
+
+
+#### 接続サンプルコード
+
+MongoDBにコレクション accounts を作成しユーザ登録と認証を行う簡単なサンプル。<br>
+POSTのパラメータに user,pass が設定されるAPIとしている。
+
+簡単な仕様：
+<table class="KTable">
+<tr><th><th>メソッド<th>URL<th>リクエスト本文<th>レスポンス<tr>
+<tr><th>登録<td>POST<td>/accounts/register<td>user={ユーザ名}&pass={パスワード}<td>200 or 500</tr>
+<tr><th>認証<td>POST<td>/accounts/login<td>user={ユーザ名}&pass={パスワード}<td>200 or 401</tr>
+</table>
+
+
+routes/accounts.js:
+
+	var MASTER_PASSWD = "ce39325bc505e74089f7e176a380370f";
+	var mongodb = require('mongodb');
+	var crypto = require('crypto');
+	var accounts;
+
+	mongodb.MongoClient.connect("mongodb://localhost:27017/test", function(err,	database) {
+		if (err != null) console.error(err);
+		accounts = database.collection("accounts");
+	});
+
+	function pass2hash(pass, solt) {
+		var hash = crypto.createHash('sha1');
+		hash.update(MASTER_PASSWD).update(pass).update(solt);
+		return hash.digest('base64');
+	}
+
+	exports.register = function register(req, res) {
+		var solt = crypto.createHash('sha1').update(""+ new Date()).digest('base64');
+		var hash = pass2hash( req.body.pass, solt);
+		accounts.update({name: req.body.name},
+			{name: req.body.name, hash: hash, solt:solt},
+			{upsert: true},
+			function(err, item) {
+				if (err == null && item.n == 1) {
+					console.log(item);
+					res.send("OK");
+				} else {
+					console.error(err);
+					res.statusCode = 500;
+					res.send("NG");
+				}
+			}
+		);
+	}
+
+	exports.login = function login(req, res) {
+		accounts.findOne({name:{$eq: req.body.name}}, function(err,doc){
+			if (err != null) console.error(err);
+			var isLoginOk = false;
+			if (doc != null) {
+				var hash = pass2hash(req.body.pass, doc.solt);
+				isLoginOk = (hash == doc.hash);
+			}
+			if (isLoginOk) {
+				res.send("OK");
+			} else {
+				res.statusCode = 401;
+				res.send("NG");
+			}
+		});
+	}
+
+
+apps.js:
+
+	var express = require('express');
+	var http = require('http');
+	var path = require('path');
+
+	var app = express();
+
+	// all environments
+	app.set('port', process.env.PORT || 3000);
+	app.set('views', __dirname + '/views');
+	app.set('view engine', 'jade');
+	app.use(express.favicon());
+	app.use(express.logger('dev'));
+	app.use(express.bodyParser());
+	app.use(express.methodOverride());
+	app.use(app.router);
+	app.use(express.static(path.join(__dirname, 'public')));
+
+	// development only
+	if ('development' == app.get('env')) {
+		app.use(express.errorHandler());
+	}
+
+	// サンプルのマッピング設定
+	var accounts = require('./routes/accounts');
+	app.post("/accounts/register", accounts.register);
+	app.post("/accounts/login", accounts.login);
+
+	http.createServer(app).listen(app.get('port'), function() {
+		console.log('Express server listening on port ' + app.get('port'));
+	});
+
+
+### まとめ
+
+Node.js と MongoDB どちらも JavaScript に慣れている人なら違和感なく入れると思う。<br>
+思いの他、学習コストは低いのではないだろうか。<br>
+Eclipse でデバッグ実行までできるので開発もしやすそう。
+
+MongoDB の「トランザクションが無い」とか「正規化しない」などの特徴は慣れるまでは難しそうだ。
+
+
+
+
+
+
+
+
