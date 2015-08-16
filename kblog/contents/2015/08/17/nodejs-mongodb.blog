@@ -36,6 +36,7 @@ express というフレームワークも一緒に入る。
 #### MongoDB
 
 MongoDB 本体はDLしてインストールするだけ。
+起動方法法は後述。
 
   - https://www.mongodb.org/downloads
     - OS は 2008 R2+ にした
@@ -75,6 +76,7 @@ app.js のメニューから 「実行 > Node Application」 でアプリが起�
 
 mongod.exe を実行するだけでサーバは起動するが
 WindowsだとDBフォルダのドライブ指定を明示したほうが良いので起動バッチを作成する。
+MongoDBのインストールフォルダに置いておく。
 
 boot-mongod.bat: サーバ起動用
 
@@ -94,9 +96,10 @@ clinet-mongo.bat: シェル起動用
 
 #### ドライバの準備
 
-ドライバは Node.js のプラグイン 'mongodb' を使用する。
+ドライバは Node.js のプラグイン 'mongodb' を使用する。<br>
+'mongoose' とかも有るようだけどとりあえず標準を使う。
 
-  - 参考： http://mongodb.github.io/node-mongodb-native/2.0/
+  - ドキュメント： [http://mongodb.github.io/node-mongodb-native/2.0/](http://mongodb.github.io/node-mongodb-native/2.0/)
 
 package.json の dependencies に "mongodb" を追加する。
 
@@ -114,8 +117,8 @@ package.json の dependencies に "mongodb" を追加する。
 	  }
 	}
 
-メニューから「実行 > npm install」を行うとmongodbのドライバがDLされる。
-
+変更後にメニューから「実行 > npm install」を行うとmongodbのドライバがDLされる。<br>
+他のプラグインも同じように追加できる。
 
 #### 接続サンプルコード
 
@@ -154,8 +157,8 @@ routes/accounts.js:
 		accounts.update({name: req.body.name},
 			{name: req.body.name, hash: hash, solt:solt},
 			{upsert: true},
-			function(err, item) {
-				if (err == null && item.n == 1) {
+			function(err, result) {
+				if (err == null && result.result.n == 1) {
 					console.log(item);
 					res.send("OK");
 				} else {
@@ -183,6 +186,7 @@ routes/accounts.js:
 			}
 		});
 	}
+
 
 
 apps.js:
@@ -217,6 +221,46 @@ apps.js:
 	http.createServer(app).listen(app.get('port'), function() {
 		console.log('Express server listening on port ' + app.get('port'));
 	});
+
+
+#### 実行結果
+
+ユーザ登録を行ってMongoDBのシェルからDBにデータが登録された事を確認する。
+
+	> db.accounts.find();
+	{ "_id" : ObjectId("55cd9b6e8ca01a0a50ecd707"), "name" : "abc", "hash" : "+1j0H0OdNH/HFGXspXi+hx6mtS8=", "solt" : "RzB+u5FvnOvHRXvtZi85iX9URno=" }
+	{ "_id" : ObjectId("55d011f4ba68640523bd0271"), "name" : "xxx", "hash" : "wsB0iPj/2BtLHGXWmSFqeGjqwn4=", "solt" : "1o2QK3qqdWSgw1cFQgbIj4DnpBA=" }
+	{ "_id" : ObjectId("55d0126cba68640523bd0272"), "name" : "yyyy", "hash" : "lHj8Xu6HNrrpjn9w6i9FnWYUwdI=", "solt" : "BI8xyULlX/CAj19/3VonYxehG/o=" }
+	{ "_id" : ObjectId("55d012bbba68640523bd0273"), "name" : "zzz", "hash" : "xeJTRfFbVaKSI2m6QePMv9laB4E=", "solt" : "NG42owW9EC7Ntu8FAp6NWXLwbBs=" }
+
+つでに name に Index を作成しておく。
+
+	> db.accounts.ensureIndex({name:1},{unique:true});
+	{
+	        "createdCollectionAutomatically" : false,
+	        "numIndexesBefore" : 1,
+	        "numIndexesAfter" : 2,
+	        "ok" : 1
+	}
+	> db.accounts.getIndexes()
+	[
+	        {
+	                "v" : 1,
+	                "key" : { "_id" : 1 },
+	                "name" : "_id_",
+	                "ns" : "test.accounts"
+	        },
+	        {
+	                "v" : 1,
+	                "unique" : true,
+	                "key" : { "name" : 1 },
+	                "name" : "name_1",
+	                "ns" : "test.accounts"
+	        }
+	]
+
+MongoDBはスキーマレスなのでこういう設定をするタイミングはよくわからない。<br>
+_id の役割を完全に理解してないが name の代わりに PKEY として使っても良いのかもしれない。
 
 
 ### まとめ
