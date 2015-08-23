@@ -1,8 +1,8 @@
 Subject: Node.js と MongoDB の開発環境構築メモ
 Content-type: markdown/text
-Tags: javascript,Node.js,MongoDB
+Tags: javascript,Node.js,MongoDB,メモ
 Date: 2015/08/17
-Public: no
+Public: yes
 
 
 最近流行りの Node.js と MongoDB の組み合わせで開発環境を作ったメモ。
@@ -96,10 +96,8 @@ clinet-mongo.bat: シェル起動用
 
 #### ドライバの準備
 
-ドライバは Node.js のプラグイン 'mongodb' を使用する。<br>
+ドライバは Node.js のモジュール 'mongodb' を使用する。<br>
 'mongoose' とかも有るようだけどとりあえず標準を使う。
-
-  - ドキュメント： [http://mongodb.github.io/node-mongodb-native/2.0/](http://mongodb.github.io/node-mongodb-native/2.0/)
 
 package.json の dependencies に "mongodb" を追加する。
 
@@ -118,7 +116,12 @@ package.json の dependencies に "mongodb" を追加する。
 	}
 
 変更後にメニューから「実行 > npm install」を行うとmongodbのドライバがDLされる。<br>
-他のプラグインも同じように追加できる。
+他のモジュールも同じように追加できる。
+
+
+ドライバのAPIは以下を参照。
+
+  - ドキュメント： [http://mongodb.github.io/node-mongodb-native/2.0/](http://mongodb.github.io/node-mongodb-native/2.0/)
 
 #### 接続サンプルコード
 

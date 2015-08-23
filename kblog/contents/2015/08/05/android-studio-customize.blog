@@ -1,6 +1,6 @@
 Subject: Android Studio のカスタマイズ
 Content-type: markdown/text
-Tags: Android
+Tags: Android,メモ
 Date: 2015/08/05
 Public: yes
 
@@ -92,6 +92,15 @@ Eclipse Code Formatter プラグインを入れて Eclipse の設定を流用す
   4. settings の Other Settings > Eclipse Code Formatter へ移動
   5. 「Use the Eclipse code fomtter」をチェック
   6. 「Eclipse Java formatter config file」にエクスポートした定義ファイルを設定する。
+
+### GitHub
+
+  1. git.exe をインストールしてパスを設定する。
+  <img src="android-studio-github-3.png" width="550px"/>
+  2. gitbub のユーザとパスワードを設定する。
+  <img src="android-studio-github-1.png" width="400px"/>
+  3. メニューから「Create git repository」「Share project on github」の順に実行する。
+  <img src="android-studio-github-2.png" width="400px"/>
 
 
 ### その他
