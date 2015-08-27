@@ -1,0 +1,71 @@
+Subject: Android Studio でコンパイルの前処理
+Content-type: markdown/text
+Tags: android, gradle
+Date: 2015/08/27
+Public: yes
+
+
+Android Studio の gradle でコンパイル前に処理を入れる方法を調べたメモ。
+
+   - 環境：Android studio 1.3
+
+build.gradle の拡張については意外に情報が少ないです。<br>
+公式の資料は以下です。
+
+  - [Gradle Plugin User Guide](http://tools.android.com/tech-docs/new-build-system/user-guide)
+  - 翻訳：[Gradleプラグインユーザーガイド](http://d.hatena.ne.jp/bs-android/20130710/1373433692)
+
+翻訳は有志の方がされていますが内容はすこし古いです。
+
+
+やりたいことは アプリバージョン と GitのコミットID を asstes のファイルに埋め込む事です。
+
+	src/main/assets/about-template.html:
+		Version:@VERSION@ (Commit:@COMMIT_ID@)
+			↓
+	src/main/assets/about.html:
+		Version:1.0.0 (Commit:cc2e3ac008092db2cd46b80336921471e6716af4)
+
+結論としては app/build.gradle に以下を追加することでできました。
+
+	import org.apache.tools.ant.filters.ReplaceTokens
+
+	def getCommitId() {
+	    try {
+	        def stdout = new ByteArrayOutputStream()
+	        exec {
+	            commandLine 'git', 'rev-list', 'master', '--max-count', '1'
+	            standardOutput = stdout
+	        }
+	        return stdout.toString().trim();
+	    }
+	    catch (Exception e) {
+	        println e.toString();
+	        return "";
+	    }
+	}
+	task makeAboutHtml {
+	    copy {
+	        from 'src/main/assets/about-template.html'
+	        into 'src/main/assets/'
+	        rename(/-template.html$/,".html");
+	        filter(ReplaceTokens, tokens: [
+	                VERSION: android.defaultConfig.versionName,
+	                COMMIT_ID: getCommitId()
+	        ])
+	    }
+	}
+	android.applicationVariants.all { variant ->
+	    variant.mergeAssets.dependsOn('makeAboutHtml')
+	}
+
+
+補足：
+
+  - git.exe に実行環境でパスが通っている必要があります。
+  - applicationVariants はエディタに Cannot resolve symbol と言われますが無視して問題ありません。
+    - これでだいぶ悩みました。
+  - 本当は build/ に直接コピーしたいのですがまだそこまでやり方がわかりません。
+
+
+
