@@ -1,0 +1,199 @@
+Subject: Android アプリで top コマンド
+Content-type: markdown/text
+Tags: android
+Date: 2015/09/01
+Public: yes
+
+
+
+Lolipop にしてからバッテリー・ドレインが止まらないので調査の為に
+Linux の top コマンド相当の機能をアプリで作ってみました。
+
+Android/5.x(Lolipop) からアプリではプロセス一覧が取れなくなっています。
+API level 21 からは ActivityManagerのgetRunningTasksやgetRunningAppProcessesは使えません。
+（自分しか取れない。）
+
+公式の代替策は UsageStatsManager ですがちょっと目的が違うしパーミッションが面倒な事になってます。
+
+  - [getRunningTasksが使えなくなったLollipopでアプリ使用状況を取得する](http://qiita.com/kgmyshin/items/35b002e42df2027fb56e)
+  - [UsageStatsManagerを使ってみた](http://qiita.com/wasnot/items/6074dbcdd49141f8e7d8)
+
+
+端末アプリからは ps コマンドも動かないので無理かと思ったのですが、調べた結果
+ /proc 配下はパーミッション無しでもアプリから直接参照可能ということが分かりました。
+(セキュリティ的に良いのだろうか...)
+
+
+#### 処理手順
+
+以下、力技の手順です。
+
+  1. /proc/stat からシステム全体の CPU 時間を取得する。
+     - 先頭行の 2～10 カラムの合計値。
+  2. new File("/proc").list() の結果から数値のみのファイル名をフィルタしてPIDの一覧とする。
+  3. /proc/{PID}/cmdline からパッケージ名を取得する。
+     - ps コマンドで表示されるコマンド名が入っています。
+     - アプリの場合はパッケージ名でその他のプロセスはコマンド名になります。
+  4. /proc/{PID}/stat から各プロセスの CPU の使用状況を取得する。
+     - 13,14 カラムの合計値。
+
+/proc/stat, /proc/{PID}/stat の具体的な内容はこんな感じです。
+
+	$ cat /proc/stat
+	cpu  362 17 1759 0 0 0 4 0 0 0
+	cpu0 362 17 1759 0 0 0 4 0 0 0
+	intr 7589 41 0 0 362 1 0 370 0 0 65 0 144 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+	ctxt 96435
+	btime 1440812419
+	processes 1948
+	procs_running 3
+	procs_blocked 0
+	softirq 12783 0 5763 114 36 0 0 69 0 0 6801
+
+	$ cat /proc/931/stat
+	931 (jbd2/mtdblock1-) S 2 0 0 0 -1 2097216 0 0 0 0 0 2 0 0 20 0 1 0 42 0 0 18446744073709551615 0 0 0 0 0 0 0 2147483647 0 18446744071580385435 0 0 17 0 0 0 101 0 0 0 0 0 0 0 0 0 0
+
+読み方は Linux と同じなので
+[Man page of PROC](http://linuxjm.osdn.jp/html/LDP_man-pages/man5/proc.5.html)
+を読めば分かります。
+
+#### サンプル・ソース
+
+具体的なサンプル・ソースはこんな感じです。
+
+	package org.kotemaru.android.testprocdir;
+	import ...
+	
+	public class TopCommandSample {
+	    private static final String TAG = "TopCommandSample";
+	
+	    private static class ProcInfo {
+	        String pid;
+	        String commandLine;
+	        long lastTime;
+	        long time;
+	    }
+	
+	    private Map<String, ProcInfo> mProcInfos = new HashMap<String, ProcInfo>();
+	    private long mLastTotalTime;
+	    private Handler mHandler = new Handler(Looper.getMainLooper());
+	
+	    public void refresh() {
+	        doRefresh();
+	        mHandler.postDelayed(new Runnable() {public void run() {refresh();}}, 5000L);
+	    }
+	
+	    private void doRefresh() {
+	        long totalTime = getTotalTime();
+	        long currentTotalTime = totalTime - mLastTotalTime;
+	        mLastTotalTime = totalTime;
+	
+	        List<ProcInfo> list = new ArrayList<ProcInfo>();
+	        String files[] = new File("/proc").list();
+	        for (String pid : files) {
+	            char ch = pid.charAt(0);
+	            if ('0' > ch || ch > '9') continue;
+	            ProcInfo info = getProcInfo(pid);
+	            long time = getTime(pid);
+	            info.time = time - info.lastTime;
+	            info.lastTime = time;
+	            list.add(info);
+	        }
+	
+	        Collections.sort(list, new Comparator<ProcInfo>() {
+	            public int compare(ProcInfo lhs, ProcInfo rhs) {return (int) (rhs.time - lhs.time);}
+	        });
+	
+	        Log.d(TAG, "----- ------ -------------------------------------");
+	        for (int i = 0; i < 10; i++) {
+	            ProcInfo info = list.get(i);
+	            Log.d(TAG, String.format("%-5s %5.2f%% %s", info.pid, ((float) info.time / currentTotalTime), info.commandLine));
+	        }
+	    }
+	
+	    private ProcInfo getProcInfo(String pid) {
+	        ProcInfo info = mProcInfos.get(pid);
+	        if (info != null) return info;
+	        info = new ProcInfo();
+	        info.pid = pid;
+	        info.commandLine = getCommandLine(pid);
+	        return info;
+	    }
+	
+	    private long getTotalTime() {
+	        String data = readFile("/proc/stat");
+	        if (data == null) return 0;
+	        String[] part = data.split("\\s\\s*");
+	        long val = 0;
+	        for (int i = 1; i < 10; i++) {
+	            val += Long.valueOf(part[i]);
+	        }
+	        return val;
+	    }
+	
+	    private String getCommandLine(String pid) {
+	        String data = readFile("/proc/" + pid + "/cmdline");
+	        if (data == null) return "?";
+	        return data.trim();
+	    }
+	
+	    private long getTime(String pid) {
+	        String data = readFile("/proc/" + pid + "/stat");
+	        if (data == null) return 0;
+	        String[] part = data.split("\\s\\s*");
+	        return Long.valueOf(part[12]) + Long.valueOf(part[13]);
+	    }
+	
+	    private String readFile(String name) {
+	        try {
+	            FileInputStream in = new FileInputStream(name);
+	            try {
+	                byte[] buff = new byte[1024];
+	                int n = in.read(buff); // 手抜き
+	                if (n < 0) return "";
+	                return new String(buff, 0, n);
+	            } finally {
+	                in.close();
+	            }
+	        } catch (IOException e) {
+	            return null;
+	        }
+	    }
+	}
+
+
+#### 実行結果：
+
+上位10件を５秒おきに繰り返しログに出力します。
+
+	D/TopCommandSample( 9781): ----- ------ -------------------------------------
+	D/TopCommandSample( 9781): 9781   8.68% org.kotemaru.android.testprocdir
+	D/TopCommandSample( 9781): 1304   7.39% system_server
+	D/TopCommandSample( 9781): 950    5.47% /sbin/adbd▒▒--root_seclabel=u:r:su:s0
+	D/TopCommandSample( 9781): 960    2.24% zygote
+	D/TopCommandSample( 9781): 959    2.18% zygote64
+	D/TopCommandSample( 9781): 1393   2.18% com.android.systemui
+	D/TopCommandSample( 9781): 1491   1.29% com.android.launcher
+	D/TopCommandSample( 9781): 943    1.16% /system/bin/surfaceflinger
+	D/TopCommandSample( 9781): 1      0.87% /init
+	D/TopCommandSample( 9781): 957    0.79% /system/bin/installd
+
+  - サンプル・アプリ自体が高負荷になっているのでチューニングは必要そうです。
+
+
+#### 応用アプリ
+
+タスク・キラー・アプリの機能に組み込んでみました。
+
+  - Google Play: [Task Killer for Screen off](https://play.google.com/store/apps/details?id=org.kotemaru.android.taskkiller)
+  - ソース：[https://github.com/kotemaru/android_TaskKiller](https://github.com/kotemaru/android_TaskKiller)
+
+<img src="/2015/09/01/android-process-list-3.png"/>
+
+#### まとめ
+
+やりたい事はほぼ完全にできました。<br>
+但し、将来使えなくなる可能性は高そうなので商用アプリには使えないですね。<br>
+まあ正規のAPIでも使えなくなるんで同じかもしれないですけど。
+
+
