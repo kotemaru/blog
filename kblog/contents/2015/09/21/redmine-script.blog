@@ -1,0 +1,89 @@
+Subject: wget で Redmine のチケット登録
+Content-type: markdown/text
+Tags: redmine
+Date: 2015/09/21
+Public: yes
+
+Redmine で複数のチケット操作を手動でやってると結構たるいのでスクリプトでやる方法をメモ。
+
+詳細は以下を参照。
+
+  * [本家のRest API解説](http://www.redmine.org/projects/redmine/wiki/Rest_api)
+
+### 準備
+
+  * Redmineの「管理」->「設定」->「認証」で「RESTによるWebサービスを有効にする」を有効にする。
+  * Redmineの「個人設定」の「APIアクセスキー」をメモっとく。
+
+### チケット作成
+
+	#!/bin/bash
+	DATA_FILE=tmp.json
+	KEY=7997c5eee596b258c872e5a50f15011660203367
+	HOST=http://redmine.hogehoge.com
+	
+	cat <<EOT > $DATA_FILE
+	{"issue": {
+	 "project_id": 1,
+	 "tracker_id": 4,
+	 "status_id": 1,
+	 "subject": "タイトル",
+	 "description": "説明"
+	 "priority_id": 4,
+	 "assigned_to_id": 2,
+	 "fixed_version_id":2,
+	 "parent_issue_id": 6,
+	 "custom_field_values": {"3":"custom value"}
+	}}
+	EOT
+	cat $DATA_FILE
+	
+	wget -S -O - --method=POST \
+	  --body-file=$DATA_FILE \
+	  --header="X-Redmine-API-Key:$KEY" \
+	  --header="Content-type: application/json;charset=utf-8" \
+	  $HOST/issues.json
+
+  * 基本的に選択項目はID指定。
+    * IDは http://redmine.hogehoge.com/projects.json とかすると一覧が取れる。
+    * 項目毎にID一覧用のAPIがあるので詳細は本家サイト参照。
+  * 尚、カスタム項目は本家サイトに嘘が書いてあるので注意。以下が正解。
+<pre>"custom_field_values": {"カスタム項目ID":"項目値",...}</pre>
+  * 日本語は UTF-8 が安全。
+  * レスポンスが 200 ならうまく行ってるはず。
+    * 失敗すると 500 か 4xx が戻る。
+
+### チケット更新
+
+	#!/bin/bash
+	DATA_FILE=tmp.json
+	KEY=7997c5eee596b258c872e5a50f15011660203367
+	HOST=http://redmine.hogehoge.com
+	
+	ID=9  # チケットID
+	cat <<EOT > $DATA_FILE
+	{"issue": {
+	 "status_id": 3,
+	 "custom_field_values": {"3":"1.2.0"}
+	}}
+	EOT
+	cat $DATA_FILE
+	
+	wget -S -O - --method=PUT \
+	  --body-file=$DATA_FILE \
+	  --header="X-Redmine-API-Key:$KEY" \
+	  --header="Content-type: application/json;charset=utf-8" \
+	  $HOST/issues/$ID.json
+
+  * HTTPメソッドに PUT を指定する。
+  * URL がチケットID指定になる。
+  * 他は作成といっしょ。
+
+### まとめ
+
+チケットが項目追加になった時なんかに覚えておくと幸せになれるかも。
+
+
+
+  
+  
