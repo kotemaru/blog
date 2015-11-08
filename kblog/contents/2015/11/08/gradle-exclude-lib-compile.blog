@@ -1,0 +1,77 @@
+Subject: AndroidStudioのビルド高速化
+Content-type: markdown/text
+Tags: android, gradle
+Date: 2015/11/08
+Public: yes
+
+Android Studio の gradle は柔軟で良いのですが大規模プロジェクトだとビルドが遅くて萎ます。<br>
+
+開発途中のビルドを少しでも早くする為にサブモジュールになっている
+自前ライブラリのコンパイルを一時的に止めて外部参照する方法を考えました。
+
+build.gradle を色々いじってみたのですが結局 settings.gradle
+で include してしまうと dependencies から外してもサブモジュールのビルドが走ってしまうようです。
+
+結果として以下の手順でうまくいきました。
+
+  * gradle.properties に切り替え用プロパティを追加する。
+  * settings.gradle で上のプロパティを参照して include を切り替える。
+  * app/build.gradle で上のプロパティを参照して dependencies のライブラリの参照先を .aar or .jar に切り替える。
+
+.aar や .jar は一度フルコンパイルすればビルドされたものが残っているので
+repositories の flatDir で指定すると外部ライブラリの扱いで参照できます。
+
+以下は
+
+  * mylibrary に Androidライブラリ・モジュール
+  * libtest に Javaライブラリ・モジュール
+
+が存在するケースの例です。
+
+#### gradle.properties:
+
+	compileMode=single or multi
+
+
+#### settings.gradle:
+
+	println("compileMode="+compileMode)
+	if (compileMode == "single") {
+	    println("include ':app'")
+	    include ':app'
+	} else {
+	    println("include ':app',':mylibrary',':libtest'")
+	    include ':app',':mylibrary',':libtest'
+	}
+
+
+#### app/build.gradle:
+
+	…省略…
+	dependencies {
+	    compile fileTree(dir: 'libs', include: ['*.jar'])
+	    compile 'com.android.support:appcompat-v7:23.1.0'
+	
+	    if (compileMode == "single") {
+	        releaseCompile(name: 'mylibrary-release', ext: 'aar')
+	        debugCompile(name: 'mylibrary-debug', ext: 'aar')
+	        compile(name: 'libtest', ext: 'jar')
+	    } else {
+	        compile project(':mylibrary')
+	        compile project(':libtest')
+	    }
+	}
+	repositories {
+	    flatDir {
+	        dirs = [
+	                '../mylibrary/build/outputs/aar',
+	                '../libtest/build/libs'
+	        ]
+	    }
+	}
+
+
+まだ、実務環境に適用できていないですがこれで早くなって欲しいな～
+
+
+  
