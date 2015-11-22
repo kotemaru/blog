@@ -387,10 +387,12 @@ GCMサーバへのリクエストは JSON で行うのでライブラリ無し�
 			// 端末登録、Androidから呼ばれる。
 			deviceMap[userId] = registrationId;
 			console.log("register:", userId, registrationId);
+			res.end();
 		} else if ("unregister" == action) {
 			// 端末登録解除、Androidから呼ばれる。
 			delete deviceMap[userId];
 			console.log("unregister:", userId, registrationId);
+			res.end();
 		} else if ("send" == action) {
 			// メッセージ送信。任意の送信アプリから呼ばれる。
 			registrationId = deviceMap[userId];
@@ -411,8 +413,8 @@ GCMサーバへのリクエストは JSON で行うのでライブラリ無し�
 	
 		} else {
 			res.statusCode = 500;
+			res.end();
 		}
-		res.end();
 	}
 	
 	function requestGCM(postData, callback) {
@@ -479,8 +481,9 @@ RegistrationId の更新を制御したかったんだと思うけどもう少�
 
   * [https://github.com/kotemaru/GCM-Sample](https://github.com/kotemaru/GCM-Sample)
 
+ライブラリ的に使えるように整理した版
 
-
+  * [https://github.com/kotemaru/GCM-sample2](https://github.com/kotemaru/GCM-sample2)
 
 
 
