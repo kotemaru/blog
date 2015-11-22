@@ -1,0 +1,477 @@
+Subject: GCMのサンプル再び
+Content-type: markdown/text
+Tags: android, GCM
+Date: 2015/11/22
+Public: yes
+
+
+前に [GCM のサンプル](/2013/07/28/android-push-message.html)を書いたのですが
+ Deprecated になって GCM-3.0 がでていました。<br>
+って言うか 2.0 の存在にすら気づいていませんでしたw
+
+
+
+２年間で２回のAPI変更が有ったようです。しかも後方互換性無しに。
+似たような事多いですが最近の Google の方向性なんでしょうかね。
+
+## 基本情報
+
+基本的な情報へのリンクです。
+
+  * [Google IO 2015で発表されたGCM (Google Cloud Messaging)の新機能](http://qiita.com/Kshi-Kshi/items/c9fc9e2a8e3193c9d4a0)
+  * [GCM公式](https://developers.google.com/cloud-messaging/)
+  * [公式サンプル](https://github.com/googlesamples/google-services)
+
+## GCMの仕組み
+
+GCMの基本的な仕組み依然と変わっていません。
+
+<img src="/2013/07/28/android-push-2.png" />
+
+  - (1) アプリ起動後、GCMサーバから **端末ID** を取得します。
+  - (2) **ユーザID** と **端末ID** のペアをアプリサーバに送信してDBに保存します。
+  - (3) 目的の **ユーザ** に向けた **メッセージ** をアプリサーバに送信します。
+  - (4) アプリサーバは **ユーザID** から **端末ID** を引いてGCMサーバにメッセージを転送します。
+  - (5) GCMサーバは繋ぎっぱなしのセッションに **メッセージ** を送信します。
+
+## 準備
+
+サーバ用の API-KEY とクライアント用の SENDER-ID が必要な事は同じです。<br>
+但し、Googleのデベロッパ・コンソールが大幅変更になっているので過去記事は役にたちません。
+
+  * デベロッパ・コンソール:[https://console.developers.google.com](https://console.developers.google.com)
+
+以降の手順で取得します。
+
+### クライアント用 SENDER-ID の取得
+
+SENDER-ID はプロジェクト番号なのでプロジェクトを作成します。
+
+<img src="/2015/11/22/gcm3.0-sample-1.png" width="500"/>
+
+プロジェクトIDの右に表示される数値が SENDER-ID です。
+
+<img src="/2015/11/22/gcm3.0-sample-2.png" width="500"/>
+
+プロジェクトの利用可能 API に 「Cloud Message for Android」 を追加します。
+
+<img src="/2015/11/22/gcm3.0-sample-3.png" width="500"/>
+
+有効にします。
+
+<img src="/2015/11/22/gcm3.0-sample-4.png" width="500"/>
+
+### サーバ用 API-KEY の取得
+
+認証情報の追加からAPIキーを選択します。
+
+<img src="/2015/11/22/gcm3.0-sample-6.png" width="500"/>
+
+「サーバキー」を選択します。
+
+<img src="/2015/11/22/gcm3.0-sample-7.png" width="500"/>
+
+表示された値がサーバ用 API-KEY になります。
+
+<img src="/2015/11/22/gcm3.0-sample-8.png" width="500"/>
+
+## クライアントの実装
+
+### サービス
+
+GCM3.0 ではアプリは以下の３つの Service を必要とします。
+
+<table class="KTable" width="99%">
+<tr><th>目的<th>継承元クラス</tr>
+<tr><td>RegistrationIdの更新通知を受け取る<td>extends InstanceIDListenerService</tr>
+<tr><td>GCMのメッセージを受け取る<td>extends GcmListenerService</tr>
+<tr><td>RegistrationIdの更新をアプリサーバに送信する<td>extends IntentService</tr>
+</table>
+
+> ３つに分ける理由はよくわかりませんが少なくとも GcmListenerService
+> は onStartCommand() が final なので機能追加はできません。
+
+
+##### TokenRefreshService.java:
+
+RegistrationId の更新タイミングを受け取るだけのサービスです。<br>
+GCMRegisterService にイベントを転送するだけです。
+
+	package org.kotemaru.android.gcm_sample;
+	import ...
+	
+	public class TokenRefreshService extends InstanceIDListenerService {
+	    @Override
+	    public void onTokenRefresh() {
+	        Intent intent = new Intent(this, GCMRegisterService.class);
+	        startService(intent);
+	    }
+	}
+
+##### GCMRegisterService.java:
+
+RegistrationId を更新してアプリサーバへ登録・登録解除処理を行う。<br>
+
+	package org.kotemaru.android.gcm_sample;
+	import ...
+	
+	public class GCMRegisterService extends IntentService {
+	    private static final String TAG = GCMRegisterService.class.getSimpleName();
+	    private Handler toaster = new Handler(Looper.getMainLooper());
+	
+	    public GCMRegisterService() {
+	        super("GCMRegisterService");
+	    }
+	    @Override
+	    protected void onHandleIntent(Intent intent) {
+	        String oldRegId = GCMRegister.getRegistrationId(this);
+	        String regId = GCMRegister.registerSync(this, SENDER-ID);
+	        if (regId != null) {
+	            if (oldRegId != null)  onUnregistered(this, oldRegId);
+	            onRegistered(this, regId);
+	        }
+	    }
+	    protected void onRegistered(Context context, String registrationId) {
+	        Log.i(TAG, "onRegistered: regId = " + registrationId);
+	        // GCMから発行された端末IDをアプリサーバに登録する。
+	        String uri = SERVER_URL + "?action=register" + "&userId=" + USER_ID + "&regId=" + registrationId;
+	        Util.doGet(uri);
+	    }
+	    protected void onUnregistered(Context context, String registrationId) {
+	        Log.i(TAG, "onUnregistered: regId = " + registrationId);
+	        // GCMから発行された端末IDをアプリサーバから登録解除する。
+	        String uri = SERVER_URL + "?action=unregister" + "&userId=" + USER_ID + "&regId=" + registrationId;
+	        Util.doGet(uri);
+	    }
+	}
+
+##### GCMReceiverService.java:
+
+GCM のメッセージを受け取るサービス。
+
+	package org.kotemaru.android.gcm_sample;
+	import ...
+	
+	public class GCMReceiverService extends GcmListenerService {
+	    private static final String TAG = GCMReceiverService.class.getSimpleName();
+	    @Override
+	    public void onMessageReceived(String from, Bundle data) {
+	        String msg = data.getString("msg");
+	        Log.d(TAG, "onMessageReceived: from=" + from + "  message=" + msg);
+	    }
+	    @Override
+	    public void onDeletedMessages() {
+	        Log.d(TAG, "onDeletedMessages:");
+	    }
+	    @Override
+	    public void onMessageSent(String msgId) {
+	        Log.d(TAG, "onMessageSent:" + msgId);
+	    }
+	    @Override
+	    public void onSendError(String msgId, String error) {
+	        Log.d(TAG, "onSendError:" + msgId + "," + error);
+	    }
+	}
+
+
+### その他
+
+##### GCMRegister.java:
+
+旧APIの GCMRegister に似せた RegistrationId 管理クラス。<br>
+一旦取得した RegistrationId は Preferences に保存して無駄な通信をしないようにします。
+
+	package org.kotemaru.android.gcm_sample;
+	import ...
+	
+	public class GCMRegister {
+	    private static final String TAG = GCMRegister.class.getSimpleName();
+	    public static final String GCM_PREF_NAME = "GCM";
+	    public static final String KEY_REG_ID = "RegistrationId";
+	
+	    /**
+	     * 登録済の RegistrationId を返す。
+	     *
+	     * @param context
+	     * @return null=未登録
+	     */
+	    public static String getRegistrationId(Context context) {
+	        SharedPreferences prefs = context.getSharedPreferences(GCM_PREF_NAME, Context.MODE_PRIVATE);
+	        String regId = prefs.getString(KEY_REG_ID, null);
+	        Log.d(TAG, "getRegistrationId:" + regId);
+	        return regId;
+	    }
+	
+	    /**
+	     * GCM3.0の InstanceID から RegistrationId を取得する。
+	     * <li>RegistrationId は Preferences に保存する。</li>
+	     * <li>通信をするのでUI-Threadでは実行不可</li>
+	     *
+	     * @param context
+	     * @param senderId アプリのSENDER-ID
+	     * @return RegistrationId (null=取得失敗)
+	     */
+	    public static String registerSync(final Context context, final String senderId) {
+	        SharedPreferences prefs = context.getSharedPreferences(GCM_PREF_NAME, Context.MODE_PRIVATE);
+	        try {
+	            InstanceID instanceID = InstanceID.getInstance(context);
+	            String regId = instanceID.getToken(senderId, GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
+	            Log.d(TAG, "registerSync: " + senderId + ":" + regId);
+	            prefs.edit().putString(KEY_REG_ID, regId).apply();
+	            return regId;
+	        } catch (Exception e) {
+	            Log.e(TAG, "Failed get token:" + senderId, e);
+	            prefs.edit().putString(KEY_REG_ID, null).apply();
+	            return null;
+	        }
+	    }
+	}
+
+
+##### MainActivity.java:
+
+アプリとしての初期化処理を行います。<br>
+RegistrationId が未登録ならばサービスに登録要求を出すだけです。
+
+	package org.kotemaru.android.gcm_sample;
+	import ...
+	
+	/**
+	 * クライアントアプリ本体。
+	 */
+	public class MainActivity extends Activity {
+	    // https://console.developers.google.comのProject Number。
+	    public static final String SENDER-ID = "99999999999";
+	    // アプリサーバーのURL。
+	    public static final String SERVER_URL = "http://192.168.0.9:8888/";
+	    // アプリのユーザID。本来はログイン中のユーザとかになるはず。
+	    public static final String USER_ID = "TarouYamada";
+	
+	    @Override
+	    protected void onCreate(Bundle savedInstanceState) {
+	        super.onCreate(savedInstanceState);
+	        setContentView(R.layout.activity_main);
+	
+	        final String regId = GCMRegister.getRegistrationId(this);
+	        if (regId == null || regId.isEmpty()) {
+	            // GCMへ端末登録。
+	            Intent intent = new Intent(this, GCMRegisterService.class);
+	            startService(intent);
+	        }
+	    }
+	}
+
+##### AndroidManifest.xml
+
+パーミッションは変わっていません。<br>
+service/recevier の定義はほぼテンプレなのでクラス名の差し替えだけで済むと思います。
+
+
+	<?xml version="1.0" encoding="utf-8"?>
+	<manifest
+	    package="org.kotemaru.android.gcm_sample"
+	    xmlns:android="http://schemas.android.com/apk/res/android">
+	
+	    <meta-data
+	        android:name="com.google.android.gms.version"
+	        android:value="@integer/google_play_services_version"/>
+	
+	    <uses-permission android:name="android.permission.INTERNET"/>
+	    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+	    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
+	    <uses-permission android:name=".permission.C2D_MESSAGE"/>
+	    <!-- <uses-permission android:name="android.permission.GET_ACCOUNTS"/> under API-15 -->
+	    <permission
+	        android:name=".permission.C2D_MESSAGE"
+	        android:protectionLevel="signature"/>
+	
+	    <application
+	        android:allowBackup="true"
+	        android:icon="@mipmap/ic_launcher"
+	        android:label="@string/app_name"
+	        android:theme="@style/AppTheme">
+	        <activity
+	            android:name=".MainActivity"
+	            android:label="@string/app_name">
+	            <intent-filter>
+	                <action android:name="android.intent.action.MAIN"/>
+	                <category android:name="android.intent.category.LAUNCHER"/>
+	            </intent-filter>
+	        </activity>
+	
+	        <receiver
+	            android:name="com.google.android.gms.gcm.GcmReceiver"
+	            android:exported="true"
+	            android:permission="com.google.android.c2dm.permission.SEND">
+	            <intent-filter>
+	                <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
+	                <category android:name="org.kotemaru.android.gcm_sample"/>
+	            </intent-filter>
+	        </receiver>
+	
+	        <service
+	            android:name=".TokenRefreshService"
+	            android:exported="false">
+	            <intent-filter>
+	                <action android:name="com.google.android.gms.iid.InstanceID"/>
+	            </intent-filter>
+	        </service>
+	
+	        <service
+	            android:name=".GCMRegisterService"
+	            android:exported="false">
+	        </service>
+	
+	        <service
+	            android:name=".GCMReceiverService"
+	            android:exported="false">
+	            <intent-filter>
+	                <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
+	            </intent-filter>
+	        </service>
+	    </application>
+	
+	</manifest>
+
+## サーバ
+
+サーバは特に変更が無いはずですが Android Struio でシンプルな Servlet
+が作れなかったので NodeJS で書いてみました。
+
+GCMサーバへのリクエストは JSON で行うのでライブラリ無しでも行けます。<br>
+公式サイトの以下を参考にしました。
+
+  * [Simple Downstream Messaging](https://developers.google.com/cloud-messaging/downstream)
+
+
+##### app.js:
+
+	/**
+	 * GCM アプリサーバ
+	 * - API
+	 * -- ?action=register&userId={ユーザID}&regId={端末ＩＤ}
+	 * -- ?action=unregister&userId={ユーザID}
+	 * -- ?action=send&userId={ユーザID}&msg={送信メッセージ}
+	 */
+	var TAG = "app:"
+	var Http = require('http');
+	var Https = require('https');
+	var Url = require('url');
+	var QueryString = require('querystring');
+	
+	var PORT = 8888;
+	// https://console.developers.google.comで生成したAPIキー。
+	var API_KEY = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
+	
+	var deviceMap = {};
+	function doService(req, res) {
+		var url = Url.parse(req.url);
+		req.parsedUrl = url;
+		req.params = QueryString.parse(url.query);
+	
+		var action = req.params.action;
+		var registrationId = req.params.regId;
+		var userId = req.params.userId;
+		var msg = req.params.msg;
+	
+		if ("register" == action) {
+			// 端末登録、Androidから呼ばれる。
+			deviceMap[userId] = registrationId;
+			console.log("register:", userId, registrationId);
+		} else if ("unregister" == action) {
+			// 端末登録解除、Androidから呼ばれる。
+			delete deviceMap[userId];
+			console.log("unregister:", userId, registrationId);
+		} else if ("send" == action) {
+			// メッセージ送信。任意の送信アプリから呼ばれる。
+			registrationId = deviceMap[userId];
+			var postData = {
+				registration_ids : [registrationId],
+				data : {
+					msg : msg
+				}
+			};
+			requestGCM(postData, function(statusCode, response, err) {
+				res.statusCode = statusCode;
+				var buff = new Buffer(JSON.stringify(response));
+				res.setHeader('Content-Type', 'application/json;charset=utf-8');
+				res.setHeader('Content-length', buff.length);
+				res.write(buff);
+				res.end();
+			});
+	
+		} else {
+			res.statusCode = 500;
+		}
+		res.end();
+	}
+	
+	function requestGCM(postData, callback) {
+		var buff = new Buffer(JSON.stringify(postData));
+		var requestOpts = {
+			method : 'POST',
+			host : 'gcm-http.googleapis.com',
+			port : 443,
+			path : '/gcm/send',
+			headers : {
+				'Content-length' : buff.length,
+				'Connection' : 'close',
+				'Content-Type' : 'application/json;charset=utf-8',
+				'Authorization' : 'key=' + API_KEY
+			}
+		};
+		console.log("GCM request:", postData);
+	
+		var svrReq = Https.request(requestOpts, function(svrRes) {
+			var rawBody = "";
+			svrRes.on('data', function(chunk) {
+				rawBody += chunk;
+			});
+			svrRes.on('end', function() {
+				console.log("GCM response:", rawBody);
+				if (svrRes.statusCode == 200) {
+					callback(svrRes.statusCode, JSON.parse(rawBody));
+				} else {
+					callback(svrRes.statusCode, rawBody);
+				}
+			});
+		});
+		svrReq.on('error', function(e) {
+			callback(500, null, e);
+		});
+	
+		svrReq.write(buff);
+		svrReq.end();
+	}
+	
+	// HTTPサーバ作成
+	var server = Http.createServer();
+	server.on('request', doService);
+	server.listen(PORT);
+	
+	console.log("listen porxy", PORT);
+
+
+## 補足
+
+onTokenRefresh() のテストが難しいです。<br>
+一時的に TokenRefreshService を exported="true" にして adb からイベントを送ります。
+
+	adb shell am startservice -a com.google.android.gms.iid.InstanceID\
+		--es "CMD" "RST" \
+		-n org.kotemaru.android.gcm_sample/.TokenRefreshService
+
+## 所感
+
+なんか色々面倒くさくなった感じ。
+RegistrationId の更新を制御したかったんだと思うけどもう少し整理した API にできなかったんだろうか。
+
+全てのソースはこちら
+
+  * [https://github.com/kotemaru/GCM-Sample](https://github.com/kotemaru/GCM-Sample)
+
+
+
+
+
+

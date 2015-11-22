@@ -4,6 +4,9 @@ Tags: Android,GAE
 Date: 2013/07/29
 Public: yes 
 
+
+<font color="red">※</font>[この記事の内容は古くなっています=>「GCMのサンプル再び」](/2015/11/22/gcm3.0-sample.html)
+
 Android でも Push メッセージが使えると言うので試して見ようと思ったら
 Google のサンプルが分り辛くて結局自分でサンプルを書いてしまった。
 
