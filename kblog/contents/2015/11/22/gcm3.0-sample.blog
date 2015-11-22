@@ -333,6 +333,15 @@ service/recevier の定義はほぼテンプレなのでクラス名の差し替
 	
 	</manifest>
 
+##### app/build.gradle:
+
+dependencies に play-services を追加します。
+
+	dependencies {
+		:
+	    compile 'com.google.android.gms:play-services:8.3.0'
+	}
+
 ## サーバ
 
 サーバは特に変更が無いはずですが Android Struio でシンプルな Servlet
