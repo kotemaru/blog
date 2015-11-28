@@ -170,10 +170,11 @@ jQuery から使う場合は $.getJSON を使わず $.ajax で dataType:"jsonp"
 
 JQMDPで作ったサンプル。
 <ul>
-<li><a href="http://jqmdp.googlecode.com/svn/tags/jqmdp-1.0rc1/war/demos/samples/picasa/picasa.html">->動かす</a>
-<li><a href="http://jqmdp.googlecode.com/svn/tags/jqmdp-1.0rc1/war/demos/docs/samples/pages.html#picasa">->ソース</a>
+<li><a href="/other/jquery.mobile.jqmdp-1.0rc2/demos/samples/picasa/picasa.html">->動かす</a>
+<li><a href="/other/jquery.mobile.jqmdp-1.0rc2/demos/samples/picasa2/picasa.html">->動かす(画像複数版)</a>
+<li><a href="/other/jquery.mobile.jqmdp-1.0rc2/demos/docs/samples/pages.html#picasa">->ソース</a>
 </ul>
-
+ 
 <p><img src="/old/img/lovelog/picasa-1.png"/></p>
 
 画像をクリックしてアルバムの一覧へ

@@ -1,0 +1,228 @@
+<!DOCTYPE html> 
+<html> 
+	<head> 
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta id="viewport" name="viewport"
+		content="width=auto; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;" />
+	<title>jqmdp demo page</title> 
+
+	
+
+	<link rel="stylesheet" href="../../docs.css" />
+	<link rel="stylesheet" href="../../../js/jqm11/jquery.mobile-1.1.0.min.css" />
+	<script src="../../../js/jquery-1.7.1.js"></script>
+
+	<script src="../../../js/jquery.mobile.jqmdp-1.0rc2.js"></script>
+	<script src="../../../js/jqm11/jquery.mobile-1.1.0.js"></script>
+
+</head>
+
+<body >
+<!-- ======================================================================== -->
+	<div data-role="page" id="index" >
+		<div data-role="header" data-position="fixed" data-theme="e" >
+			<h1>Scope attributes</h1>
+			<a href="../../index.html" data-icon="back" data-ajax="false"
+				data-direction="reverse" data-iconpos="notext"></a>
+			<a href="../../index.html" data-icon="home"  data-ajax="false"
+				data-transition="none" data-iconpos="notext"></a>
+		</div>
+		<div data-role="content" >
+			<div class="left-nav">
+				<div data-dp-template="../../title.html" ></div>
+				<hr/>
+				<div data-dp-template="navi.html"></div>
+			</div>
+
+			<div class="right-nav" >
+<h2>スコープ属性</h2>
+<p>
+スコープ制御にかかわるカスタム属性である。
+<br/>
+スコープに付いては<a href="docs/concept/scope.html">スコープの概念</a>を参照。
+</p>
+<div data-dp-template="#scopeAttrLinkList"></div>
+			</div>
+		</div>
+		<div data-role="footer" data-position="fixed" data-dp-template="../../footer.html"></div>
+	</div>
+	
+	<div data-role="template" id="scopeAttrLinkList"   >
+		<ul data-role="listview" data-inset="true" >
+			<li><a href="#data-dp-scope">data-dp-scope属性</a></li>
+			<li><a href="#data-dp-id">data-dp-id属性</a></li>
+		</ul>
+	</div>
+
+<!-- ======================================================================== -->
+
+	<div data-role="page" id="data-dp-scope" >
+		<div data-role="header" data-position="fixed" data-theme="e" >
+			<h1>Scope attributes</h1>
+			<a href="#index" data-icon="back" 
+				data-direction="reverse" data-iconpos="notext"></a>
+			<a href="../../index.html" data-icon="home"  data-ajax="false"
+				data-transition="none" data-iconpos="notext"></a>
+		</div>
+		<div data-role="content" >
+			<div class="left-nav">
+				<div data-dp-template="../../title.html" ></div>
+				<hr/>
+<div data-dp-template="#scopeAttrLinkList"></div>
+			</div>
+
+			<div class="right-nav" >
+<h2>data-dp-scope属性</h2>
+<p>
+この属性を設定された HTML 要素にスコープが設定される。
+属性値は JavaScript の式として評価され<a href="../../docs/concept/scope.html">スコープ インスタンス</a>となる。
+</p>
+<p>
+この属性が評価されるのは pageinit イベントのタイミングである。
+pageinit イベントはページが実際に表示されるまで発生しないため、
+data-dp-scope属性のみを評価するAPI $.jqmdp.init() が用意されている。
+</p>
+<p>
+data-role="page" 属性を持つ要素がこの属性を持たない場合、
+data-dp-scope="({})" を持つ物として処理される。
+つまりページは常にスコープとなる。
+</p>
+<p>
+記述例：
+<pre>&lt;div <b>data-dp-scope="({dummy:'scope-1', through:'through-1'})"</b>>
+    &lt;div>
+        &lt;span data-dp-text="(dummy)">
+            &lt;!-- "scope-1" となる -->
+        &lt;/span>
+    &lt;/div>
+    &lt;div <b>data-dp-scope="({dummy:'scope-2'})"</b>>
+        &lt;span data-dp-text="(dummy)">
+            &lt;!-- "scope-2" となる -->
+        &lt;/span>
+        &lt;span data-dp-text="(through)">
+            &lt;!-- "through-1" となる -->
+        &lt;/span>
+    &lt;/div>
+    &lt;span data-dp-text="(dummy)">
+        &lt;!-- "scope-1" となる -->
+    &lt;/span>
+&lt;/div>
+</pre>
+
+実行結果：
+<blockquote>
+<div data-dp-scope="({dummy:'scope-1', through:'through-1'})">
+    <div>
+        <span data-dp-text="(dummy)">
+            <!-- "scope-1" となる -->
+        </span>
+    </div>
+    <div data-dp-scope="({dummy:'scope-2'})">
+        <span data-dp-text="(dummy)">
+            <!-- "scope-2" となる -->
+        </span>
+        <span data-dp-text="(through)">
+            <!-- "through-1" となる -->
+        </span>
+    </div>
+    <span data-dp-text="(dummy)">
+        <!-- "scope-1" となる -->
+    </span>
+</div>
+</blockquote>
+
+
+この例では定数が指定されているがグローバル変数の参照や new 演算子で有っても構わない。
+JavaScriptとして評価結果を帰す必要がかるため括弧は必須である。
+</p>
+<p>
+この属性値の中で参照できる変数はグローバル変数と $this がある。
+$this はこの属性の定義された HTML 要素の jQuery object である。
+</p>
+			</div>
+		</div>
+		<div data-role="footer" data-position="fixed" data-dp-template="../../footer.html"></div>
+	</div>
+	
+<!-- ======================================================================== -->
+
+	<div data-role="page" id="data-dp-id" >
+		<div data-role="header" data-position="fixed" data-theme="e" >
+			<h1>Scope attributes</h1>
+			<a href="#index" data-icon="back" 
+				data-direction="reverse" data-iconpos="notext"></a>
+			<a href="../../index.html" data-icon="home"  data-ajax="false"
+				data-transition="none" data-iconpos="notext"></a>
+		</div>
+		<div data-role="content" >
+			<div class="left-nav">
+				<div data-dp-template="../../title.html" ></div>
+				<hr/>
+<div data-dp-template="#scopeAttrLinkList"></div>
+			</div>
+
+			<div class="right-nav" >
+<h2>data-dp-id属性</h2>
+<p>
+この属性を設定された HTML 要素にスコープ内でのみ有効な id が振られる。
+属性値は英数字とアンダーバー(_)、ハイフン(-)のみで構成されなければならない。
+
+</p>
+<p>
+data-dp-id属性は JQMDP の API からのみ参照可能である。
+<ul>
+	<li>$(elem).jqmdp(dpId) は当該要素の jQuery object を帰す。</li>
+	<li>$(elem).scope(dpId) は当該要素のスコープ インスタンスを帰す。</li>
+</ul>
+</p>
+
+<p>
+記述例：
+<pre>&lt;div data-dp-scope="({})">
+    &lt;div>
+        &lt;div <b>data-dp-id="mySpan"</b>>scope-text-1&lt;/div>
+    &lt;/div>
+    &lt;div data-dp-scope="({})">
+        &lt;div <b>data-dp-id="mySpan"</b>>scope-text-2&lt;/div>
+        &lt;span data-dp-text="($this.jqmdp('mySpan').text())">
+            &lt;!-- "scope-text-2" となる -->	
+        &lt;/span>
+    &lt;/div>
+    &lt;span data-dp-text="($this.jqmdp('mySpan').text())">
+	    &lt;!-- "scope-text-1" となる -->	
+    &lt;/span>
+&lt;/div>
+</pre>
+注：$this は span 要素の jQuery object である。
+
+実行結果：
+<blockquote>
+<div data-dp-scope="({})">
+    <div>
+        <div data-dp-id="mySpan">scope-text-1</div>
+    </div>
+    <div data-dp-scope="({})">
+        <div data-dp-id="mySpan">scope-text-2</div>
+        <span data-dp-text="($this.jqmdp('mySpan').text())">
+            <!-- "scope-text-2" となる -->	
+        </span>
+    </div>
+    <span data-dp-text="($this.jqmdp('mySpan').text())">
+	    <!-- "scope-text-1" となる -->	
+    </span>
+</div>
+</blockquote>
+
+</p>
+			</div>
+		</div>
+		<div data-role="footer" data-position="fixed" data-dp-template="../../footer.html"></div>
+	</div>
+	
+	
+	
+	
+</body>
+
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html> 
+<html> 
+	<head> 
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta id="viewport" name="viewport"
+		content="width=auto; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;" />
+	<title>jqmdp demo page</title> 
+	
+	
+
+	<link rel="stylesheet" href="../../docs.css" />
+	<link rel="stylesheet" href="../../../js/jqm11/jquery.mobile-1.1.0.min.css" />
+	<script src="../../../js/jquery-1.7.1.js"></script>
+
+	<script src="../../../js/jquery.mobile.jqmdp-1.0rc2.js"></script>
+	<script src="../../../js/jqm11/jquery.mobile-1.1.0.js"></script>
+	<script src="../../docs.js"></script>
+	
+	<script src="../../samples/parts/rating/Rating.js"></script>
+
+	<script>
+var ratingHtml = "";
+var ratingJs = "";
+$(function(){
+	$.get("../../samples/parts/rating/Rating.html", null, function(data){
+		ratingHtml = Docs.trimHtml(data);
+		$("#index").jqmdp().refresh();
+	});
+	$.get("../../samples/parts/rating/Rating.js", null, function(data){
+		ratingJs = Docs.trimJs(data);
+		$("#index").jqmdp().refresh();
+	});
+})
+	</script>
+
+</head>
+
+<body >
+	<div data-role="page" id="index" >
+		<div data-role="header" data-position="fixed" data-theme="e" >
+			<h1>Make a parts</h1>
+			<a href="../../index.html" data-icon="back" data-ajax="false"
+				data-direction="reverse" data-iconpos="notext"></a>
+			<a href="../../index.html" data-icon="home" data-ajax="false"
+				data-transition="none" data-iconpos="notext"></a>
+		</div>
+		<div data-role="content" >
+			<div class="left-nav">
+				<div data-dp-template="../../title.html" ></div>
+				<hr/>
+				<div data-dp-template="navi.html"></div>
+			</div>
+
+			<div class="right-nav" >
+<h2>部品化</h2>
+<p>
+テンプレートとスコープの組み合わせは動的な
+HTML 部品の作成をサポートする。
+部品は再利用可能で並列に使用できる事を前提とする。
+</p>
+
+<p>
+JQMDP で想定している部品の実装方法は以下の通りである。
+<ol>
+<li>空のタグに部品化された JavaScript クラスインスタンスを スコープ インスタンス として設定する。</li>
+<li>1. のコンストラクタ内で必要に応じて HTML テンプレート の読み込み／適用する。</li>
+<li>部品内で使用するリソースは JavaScript ソースと同じディレクトリに配置する。<ul>
+	<li>相対パスを変換する API $.jqmdp.absPath() が用意されている。</li>
+</ul></li>
+<li>部品内で発生したイベントは原則 スコープ インスタンス が処理する。</li>
+<li>部品内での id属性の使用は原則禁止される。<ul>
+	<li>複数箇所での参照ができなくなる為。</li>
+	<li>data-dp-id属性により代用可能なはずである。</li>
+</ul></li>
+<li>CSSに関しては特に規定しない。</li>
+</ol>
+</p>
+
+<p>
+星評価部品の例を示す。
+<p/>
+部品の参照：
+<pre>
+&lt;div <b>data-dp-scope="(new Rating($this,3))"</b>>&lt;/div>
+</pre>
+実行結果：
+<blockquote>
+<div data-dp-scope="(new Rating($this,3))"></div>
+</blockquote>
+</p>
+
+<p>
+JavaScriptコード：
+<pre data-dp-html="(ratingJs)"></pre>
+</p>
+
+<p>
+HTMLテンプレート：
+<pre data-dp-html="(ratingHtml)"></pre>
+</p>
+
+<p>
+画像リソース：
+<blockquote>
+star-1.0.png=<img src="../../samples/parts/rating/star-1.0.png"/>
+star-0.5.png=<img src="../../samples/parts/rating/star-0.5.png"/>
+star-0.0.png=<img src="../../samples/parts/rating/star-0.0.png"/>
+</blockquote>
+</p>
+			</div>
+		</div>
+		<div data-role="footer" data-position="fixed" data-dp-template="../../footer.html"></div>
+	</div>
+</body>
+
+</html>

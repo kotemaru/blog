@@ -1,0 +1,89 @@
+<!DOCTYPE html> 
+<html> 
+<head> 
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta id="viewport" name="viewport"
+		content="width=auto; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;" />
+	<title>jqmdp demo page</title> 
+	
+	<link rel="stylesheet" href="../../../js/jqm11/jquery.mobile-1.1.0.min.css" />
+	<script src="../../../js/jquery-1.7.1.js"></script>
+	<script src="../../../js/jquery.mobile.jqmdp-1.0rc2.js"></script>
+	<script src="../../../js/jqm11/jquery.mobile-1.1.0.js"></script>
+
+	<style>
+		body > div{max-width: 320px;} /* It is like iPhone. */
+	</style>
+	
+	<script src="basic.js"></script>
+	<script>
+		$.jqmdp.debug(false);
+	</script>
+</head>
+<body >
+	<!-- === ユーザ一覧ページ ============================================== -->
+	<!-- UserList のインスタンスをページに設定している。 -->
+	<div data-role="page" id="UserList"
+						data-dp-scope="(new UserList($this))">
+		<div data-role="header" data-position="fixed" data-theme="e" >
+			<h1>User list</h1>
+			<!-- クリック処理としてスコープの新規ユーザ関数を呼んでいる。-->
+			<!-- ここで $.scope(this) は上記の data-dp-scope の値が帰る。-->
+			<a href="#" data-icon="plus" onclick="$.scope(this).newUser()"
+				data-iconpos="left">New</a>
+		</div>
+		<div data-role="content" >
+			<!-- ユーザ人数分のループを行ってリストを合成している。-->
+			<!-- data-dp-for|text は $.scope(this) スコープで実行されるので $.scope(this) は省略可能。-->
+			<ul	data-role="listview"
+						data-dp-for="(i=0; i<users().length; i++)">
+				<li>
+					<!-- クリック処理としてスコープのユーザ編集関数を呼んでいる。-->
+					<a href="#" onclick="$.scope(this).goEdit(this)" data-dp-args="(i)">
+						<!-- 項目をユーザ名に置き換えている。 -->
+						<span data-dp-text="(users()[i].firstName)"></span>
+						<span data-dp-text="(users()[i].lastName)"></span>
+					</a>
+				</li>
+			</ul>
+		</div>
+	</div>
+	<!-- 捕捉：
+			- イベント属性(onclick等)と置換属性(date-dp-text等)は扱いが全く別である事に注意。
+			- href="javascript:$.scope(this)" は this=window の為、使用できない。
+	--> 
+	
+	<!-- === ユーザ編集ページ ============================================== -->
+	<!-- UserEdit のインスタンスをページに設定している。 -->
+	<div data-role="page" id="UserEdit"
+						data-dp-scope="(new UserEdit($this))">
+		<div data-role="header" data-position="fixed" data-theme="e" >
+			<h1>User edit</h1>
+			<a href="#UserList" data-icon="back"
+				data-direction="reverse" data-iconpos="notext"></a>
+		</div>
+		<div data-role="content" >
+			<form action="">
+				<!-- 入力項目の初期値をカレントユーザの情報に置き換えている -->
+				<label>First Name:</label>
+				<input name="firstName" data-dp-value="(user.firstName)"/>
+				<label>Last Name:</label>
+				<input name="lastName"  data-dp-value="(user.lastName)"/>
+				<label>E-Mail:</label>
+				<input name="email" data-dp-value="(user.email)" />
+				
+				<div>
+					<input type="checkbox" name="admitted" id="admitted" 
+							value="true" data-dp-checked="(user.admitted)"/>
+					<label for="admitted">E-Mail is admitted</label>
+				</div>
+				<hr/>
+				<!-- submit処理としてスコープの関数を呼んでいる。-->
+				<a data-role="button" href="#" onclick="$.scope(this).submit()">Submit</a>
+			</form>
+		</div>
+	</div>
+	<!-- ================================================= -->
+</body>
+</html>

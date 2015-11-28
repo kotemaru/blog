@@ -1,0 +1,50 @@
+.left-nav {
+	min-width:280px;
+	width:35%;
+	display:block;
+	float:left;
+	margin-right:20px;
+}
+.right-nav {
+	min-width:300px;
+	width:60%;
+	display:block;
+	float:left;
+}
+.right-nav  blockquote {
+	font-size: 80%;
+	border: 1px solid black;
+	padding: 8px;
+	margin-left: 2em;
+	margin-right: 2em;
+	background: white;
+}
+.right-nav xmp,pre {
+	font-size: 80%;
+	border: 1px solid black;
+	padding: 8px;
+	margin-left: 2em;
+	margin-right: 0em;
+
+	display: block;
+    white-space: pre-wrap;
+}
+.right-nav pre b {
+	color: #888800;
+	font-style: italic;
+	font-weight: 100;
+	text-shadow: none;
+}
+.right-nav pre i {
+	color: green;
+	font-style: italic;
+	/*text-shadow: 1px 1px 1px black;*/
+	text-shadow: none;
+}
+
+.right-nav table {
+	margin-top: 1em;
+}
+.Template {
+	display:none;
+}

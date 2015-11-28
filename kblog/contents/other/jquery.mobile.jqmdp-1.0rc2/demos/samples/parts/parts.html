@@ -1,0 +1,68 @@
+<!DOCTYPE html> 
+<html> 
+<head> 
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta id="viewport" name="viewport"
+		content="width=auto; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;" />
+	<title>jqmdp demo page</title> 
+
+<!--
+	<link rel="stylesheet" href="../../../js/jqm11/jquery.mobile-1.1.0.min.css" />
+	<script src="../../../js/jquery-1.7.1.js"></script>
+	<script src="../../../js/jquery.mobile.jqmdp-1.0rc2.js"></script>
+	<script src="../../../js/jqm11/jquery.mobile-1.1.0.js"></script>
+-->
+	<script src="../../../js/jqmdp.loader.js"></script>
+
+	<link rel="stylesheet" href="calendar/Calendar.css" />
+	<script src="calendar/Calendar.js"></script>
+	<script src="radio/Radio.js"></script>
+	<script src="rating/Rating.js"></script>
+</head>
+
+<body>
+	<div id="index" data-role="page" >
+		<div data-role="header" data-position="fixed" >
+			<h1>Parts samples</h1>
+			<a href="../../index.html" data-icon="back" data-ajax="false"
+				data-direction="reverse" data-iconpos="notext"></a>
+			<a href="../../index.html" data-icon="home"  data-ajax="false"
+				data-transition="none" data-iconpos="notext"></a>
+		</div>
+		<div data-role="content">
+			<br/>カレンダー部品:(input連係)
+			<div data-dp-scope="{dummy:null}">
+				<input data-dp-id="inputCal" type="date" style="width:10em;display:inline;"
+					data-dp-value="($this.scope('popupCal').yyyy_mm_dd())"/>
+				<a href="#" data-role="button" data-inline="true" data-icon="grid" 
+					data-iconpos="notext" style="vertical-align:bottom;"
+					onclick="$(this).scope('popupCal').open()"
+				></a>
+				<span data-dp-id="popupCal" 
+					data-dp-scope="(new Calendar($this,{dialog:true,target:'inputCal'}))" ></span>
+			</div>
+
+			<p><hr/></p>
+			水平選択ボタン:(JQMにも存在するが記法があまりに冗長な為、部品化したもの)<br/>
+			<span data-dp-scope="(new Radio($this))" >
+				<a data-dp-args="('a')">a</a>
+				<a data-dp-args="('b')">b</a>
+				<a data-dp-args="('c')">c</a>
+			</span>
+			<br/><br/>
+			水平選択ボタン:(複数オプション)<br/>
+			<span data-dp-scope="(new Radio($this,{multi:true, values:['c','d']}))" >
+				<a data-dp-args="('a')">a</a>
+				<a data-dp-args="('b')">b</a>
+				<a data-dp-args="('c')">c</a>
+				<a data-dp-args="('d')">d</a>
+				<a data-dp-args="('e')">e</a>
+			</span>
+
+			<p><hr/></p>
+			星評価:<br/>
+			<div data-dp-id="rating" data-dp-scope="(new Rating($this,3))"></div>
+	</div>
+</body>
+</html>

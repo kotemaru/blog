@@ -1,0 +1,17 @@
+body > div{
+	max-width: 320px; /* It is like iPhone. */
+}
+
+.dp-picasa div[data-dp-id='albums'] img {
+	width: 84px;
+}
+.dp-picasa div[data-dp-id='photos'] img {
+	width: 62px;
+	vertical-align: middle;
+	margin: 4px 0;
+	paffing:0;
+}
+
+.dp-picasa img {
+	cursor:pointer;
+}

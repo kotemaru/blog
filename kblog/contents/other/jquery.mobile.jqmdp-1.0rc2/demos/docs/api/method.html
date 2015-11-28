@@ -1,0 +1,174 @@
+<!DOCTYPE html> 
+<html> 
+	<head> 
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta id="viewport" name="viewport"
+		content="width=auto; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;" />
+	<title>jqmdp demo page</title> 
+
+
+
+	<link rel="stylesheet" href="../../docs.css" />
+	<link rel="stylesheet" href="../../../js/jqm11/jquery.mobile-1.1.0.min.css" />
+	<script src="../../../js/jquery-1.7.1.js"></script>
+
+	<script src="../../../js/jquery.mobile.jqmdp-1.0rc2.js"></script>
+	<script src="../../../js/jqm11/jquery.mobile-1.1.0.js"></script>
+
+</head>
+
+<body >
+<!-- ======================================================================== -->
+	<div data-role="page" id="index" >
+		<div data-role="header" data-position="fixed" data-theme="e" >
+			<h1>Method & Utilities</h1>
+			<a href="../../index.html" data-icon="back" data-ajax="false"
+				data-direction="reverse" data-iconpos="notext"></a>
+			<a href="../../index.html" data-icon="home"  data-ajax="false"
+				data-transition="none" data-iconpos="notext"></a>
+		</div>
+		<div data-role="content" >
+			<div class="left-nav">
+				<div data-dp-template="../../title.html" ></div>
+				<hr/>
+				<div data-dp-template="navi.html"></div>
+			</div>
+
+			<div class="right-nav" >
+<h2>Method & Utilities</h2>
+<p>
+JQMDP の機能を JavaScript から利用する為の API である。
+</p>
+<p>
+
+<h4>$.jqmdp(elem, dpId) or $(elem).jqmdp(dpId)</h4>
+
+jqmdp 機能拡張オブジェクトの取得。
+
+<table width="100%" border="1" cellspacing="0">
+<tr><th>引数</th><th>必須</th><th>説明</th></tr>
+<tr><td>elem</td><td>○</td><td>起点となるHTMLElement 又は jQuery Object</td></tr>
+<tr><td>dpId</td><td>×</td><td>検索対象の data-dp-id 属性値</td></tr>
+</table>
+
+<ul>
+<li>elem を起点として dpId と同じ data-dp-id属性値を持つ jQuery object が帰される。
+<li>帰される jQuery object は jqmdp のメソッドが拡張されている。
+<li>dpId を省略した場合は elem が拡張され帰される。
+</ul>
+
+<h4>$.scope(elem, dpId, val) or $(elem).scope(dpId, val)</h4>
+
+スコープ インスタンスの取得／設定。
+
+<table width="100%" border="1" cellspacing="0">
+<tr><th>引数</th><th>必須</th><th>説明</th></tr>
+<tr><td>elem</td><td>○</td><td>起点となるHTMLElement 又は jQuery Object</td></tr>
+<tr><td>dpId</td><td>×</td><td>検索対象の data-dp-id 属性値</td></tr>
+<tr><td>val</td><td>×</td><td>設定するスコープ インスタンス</td></tr>
+</table>
+
+<ul>
+<li>elem を起点として dpId と同じ data-dp-id属性値を持つ要素の所属する スコープ インスタンス が帰される。
+<li>dpId を省略した場合は elem の所属する スコープ インスタンス が帰される。
+<li>val が指定されているならばスコープ インスタンスを val に入れ換える。</li>
+<li>見付からない場合、null を帰す。</li>
+</ul>
+
+
+
+<h4>$.jqmdp.refresh(elem, delay) or $(elem).jqmdp().refresh(delay)</h4>
+
+置換属性と制御構文属性を再評価する。
+
+<table width="100%" border="1" cellspacing="0">
+<tr><th>引数</th><th>必須</th><th>説明</th></tr>
+<tr><td>elem</td><td>○</td><td>起点となるHTMLElement 又は jQuery Object</td></tr>
+<tr><td>delay</td><td>×</td><td>遅延時間(ミリ秒)</td></tr>
+</table>
+
+<ul>
+<li>厳密には elem 要素が所属するスコープ全体が再評価される。
+<li>delay が指定されていれば delayミリ秒 再評価を遅延させる。
+<ul>
+	<li>その間にrefresh()が呼ばれたらならば最初のrefresh()は無効となる。
+	<li>これは再評価に時間がかかる場合、ユーザの操作を優先させる効果が有る。
+</ul>
+</ul>
+
+<h4>$.jqmdp.args(elem) or $(elem).jqmdp().args()</h4>
+
+date-dp-args属性の値を帰す。
+
+<table width="100%" border="1" cellspacing="0">
+<tr><th>引数</th><th>必須</th><th>説明</th></tr>
+<tr><td>elem</td><td>○</td><td>HTMLElement 又は jQuery Object</td></tr>
+</table>
+
+<ul>
+<li>elem 要素に data-dp-args 属性が指定されていればその値を帰す。
+</ul>
+
+
+<h4>$.jqmdp.template(elem, src, callback) </h4>
+
+テンプレートを挿入する。
+
+<table width="100%" border="1" cellspacing="0">
+<tr><th>引数</th><th>必須</th><th>説明</th></tr>
+<tr><td>elem</td><td>○</td><td>挿入先の要素。(jQuery or HTMLElement)</td></tr>
+<tr><td>src</td><td>○</td><td>テンプレートの要素又はURL又はID</td></tr>
+<tr><td>callback</td><td>×</td><td>テンプレートの挿入後呼び出される。</td></tr>
+</table>
+<ul>
+<li>elem の子要素を src で表されるテンプレートの子要素の複製で置き換える。
+<li>src が HTMLElement 又は jQuery オブジェクトの場合は、その要素をテンプレートとする。
+<li>src が文字列でかつ「#」で始まる場合は、$(src) の要素をテンプレートとする。
+<li>src がその他の文字列の場合は、外部URLとして読み込んだHTMLをテンプレートとする。
+<li>callback はテンプレートの挿入後呼び出される。<ul>
+	<li>引数は elem と src の jQuery Object である。</li>
+	<li>外部URLの読み込みは非同期で行われる為、この callback で完了通知を受ける。</li>
+</ul></li>
+<li>注：テンプレートの子要素が対象で有ることに注意。
+</ul>
+
+<h4>$.jqmdp.markup(elem)</h4>
+
+jQuery Mobile の初期化をもう一度行う。
+
+<table width="100%" border="1" cellspacing="0">
+<tr><th>引数</th><th>必須</th><th>説明</th></tr>
+<tr><td>elem</td><td>○</td><td>再初期化対象の要素。(jQuery or HTMLElement)</td></tr>
+<tr><td>purge</td><td>×</td><td>切り離しフラグ。</td></tr>
+</table>
+<ul>
+<li>$.attr() 関数等で jQuery Mobile の属性を追加した場合に後付で適用できる。
+<li>elem 自体は再初期化の対象になら無い。</li>
+<li>purge が ture ならば再初期化中は elem を document から切り離す。<ul>
+	<li>この場合、elem も再初期化の対象となる。</li>
+	<li>但し、属性によっては jQuery Mobile が二重に評価してしまい誤動作することがある。
+	<li>非推奨機能とする。
+</ul>
+</ul>
+
+<h4>$.jqmdp.absPath(url)</h4>
+<ul>
+<li>実行中の JavaScript ファイルを起点とする相対パスを絶対パスに変換する。
+<li>基本的に外部部品が相対パスでリソースにアクセスする為の物。
+</ul>
+
+<h4>$.jqmdp.debug(b)</h4>
+<ul>
+<li>デバッグモード設定。コンソールに幾つかのメッセージが出るようになる。
+</ul>
+
+			</div>
+		</div>
+		<div data-role="footer" data-position="fixed" data-dp-template="../../footer.html"></div>
+	</div>
+
+	
+</body>
+
+</html>

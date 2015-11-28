@@ -1,0 +1,128 @@
+<!DOCTYPE html> 
+<html> 
+	<head> 
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta id="viewport" name="viewport"
+		content="width=auto; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;" />
+	<title>jqmdp demo page</title> 
+	
+	
+
+	<link rel="stylesheet" href="../../docs.css" />
+	<link rel="stylesheet" href="../../../js/jqm11/jquery.mobile-1.1.0.min.css" />
+	<script src="../../../js/jquery-1.7.1.js"></script>
+
+	<script src="../../../js/jquery.mobile.jqmdp-1.0rc2.js"></script>
+	<script src="../../../js/jqm11/jquery.mobile-1.1.0.js"></script>
+
+</head>
+
+<body >
+	<div data-role="page" id="index" >
+		<div data-role="header" data-position="fixed" data-theme="e" >
+			<h1>Replace attributes</h1>
+			<a href="../../index.html" data-icon="back" data-ajax="false"
+				data-direction="reverse" data-iconpos="notext"></a>
+			<a href="../../index.html" data-icon="home"  data-ajax="false"
+				data-transition="none" data-iconpos="notext"></a>
+		</div>
+		<div data-role="content" >
+			<div class="left-nav">
+				<div data-dp-template="../../title.html" ></div>
+				<hr/>
+				<div data-dp-template="navi.html"></div>
+			</div>
+
+			<div class="right-nav" >
+<h2>スコープの概念</h2>
+<p>
+HTML の id は HTML 文書全体を通して一意である事が求められる。
+さらに jQuery mobile では遷移先の HTML 文書をインポートする為、
+複数の HTML 文書に対して id の一意性を担保しなければならない。
+</p>
+
+<p>
+この問題を回避する為、JQMDP では HTML にスコープの概念を導入する。
+スコープは任意の HTML 要素に設定されその要素の子孫の範囲をスコープとする。
+スコープ内の要素にスコープを設定して入れ子にする事ができる。
+</p>
+
+<p>
+data-role='page' 属性を持つ要素は無条件にスコープとなる。
+</p>
+
+<h3>スコープ インスタンス</h3>
+
+<p>
+HTML要素にスコープを設定するには data-dp-scope 属性を指定する。
+属性値は JavaScript の式である。
+この式を評価した結果を スコープ インスタンス と呼ぶ。
+<br />
+スコープ インスタンスはその HTML 要素内で評価される置換属性値、制御構文属性値の
+JavaScript 式のスコープとなる。
+つまり、HTML 上のスコープを JavaScript に適用する事ができる。
+
+
+<pre>&lt;div <b>data-dp-scope="({dummy:'scope-1', through:'through-1'})"</b>>
+    &lt;div>
+        &lt;span <i>data-dp-text="(dummy)"</i>>
+            &lt;!-- "scope-1" となる -->
+        &lt;/span>
+    &lt;/div>
+    &lt;div <b>data-dp-scope="({dummy:'scope-2'})"</b>>
+        &lt;span <i>data-dp-text="(dummy)"</i>>
+            &lt;!-- "scope-2" となる -->
+        &lt;/span>
+        &lt;span <i>data-dp-text="(through)"</i>>
+            &lt;!-- "through-1" となる -->
+        &lt;/span>
+    &lt;/div>
+    &lt;span <i>data-dp-text="(dummy)"</i>>
+        &lt;!-- "scope-1" となる -->
+    &lt;/span>
+&lt;/div>
+</pre>
+</p>
+
+<p>
+入れ子になったスコープ内では親のスコープのプロパティも参照できる。
+プロパティ名が衝突する場合は子のスコープが有効となる。
+つまり、衝突しないかぎり祖先のプロパティが継承される。
+</p>
+
+<h3>スコープ内 id</h3>
+
+<p>
+スコープ内の HTML 要素にはスコープ内でのみ通用する id を設定する事ができる。
+この id は JQMDP の API を使用して参照する事ができる。
+
+<pre>&lt;div data-dp-scope="({})">
+    &lt;div>
+        &lt;div <b>data-dp-id="mySpan"</b>>scope-text-1&lt;/div>
+    &lt;/div>
+    &lt;div data-dp-scope="({})">
+        &lt;div <b>data-dp-id="mySpan"</b>>scope-text-2&lt;/div>
+        &lt;span <i>data-dp-text="($this.jqmdp('mySpan').text())"</i>>
+            &lt;!-- "scope-text-2" となる -->	
+        &lt;/span>
+    &lt;/div>
+    &lt;span <i>data-dp-text="($this.jqmdp('mySpan').text())"</i>>
+	    &lt;!-- "scope-text-1" となる -->	
+    &lt;/span>
+&lt;/div>
+</pre>
+注：$this は当該 HTML 要素の jQuery object であり、デフォルトで定義される。
+
+</p>
+<p>
+祖先のスコープは参照可能であるが子孫のスコープは参照不可である。
+同じ id が複数有る場合は自身のスコープに近い物が参照できる。
+</p>
+			</div>
+		</div>
+		<div data-role="footer" data-position="fixed" data-dp-template="../../footer.html"></div>
+	</div>
+</body>
+
+</html>

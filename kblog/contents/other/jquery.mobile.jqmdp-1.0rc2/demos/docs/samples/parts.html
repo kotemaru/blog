@@ -1,0 +1,225 @@
+<!DOCTYPE html> 
+<html> 
+	<head> 
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta id="viewport" name="viewport"
+		content="width=auto; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;" />
+	<title>jqmdp demo page</title> 
+	
+	<link rel="stylesheet" href="../../docs.css" />
+<!--
+	<link rel="stylesheet" href="../../../js/jqm11/jquery.mobile-1.1.0.min.css" />
+	<script src="../../../js/jquery-1.7.1.js"></script>
+	<script src="../../../js/jquery.mobile.jqmdp-1.0rc2.js"></script>
+	<script src="../../../js/jqm11/jquery.mobile-1.1.0.js"></script>
+-->
+	<link rel="stylesheet" href="../../../js/jqm11/jquery.mobile-1.1.0.min.css" />
+	<script src="../../../js/jquery-1.7.1.js"></script>
+	<script src="../../../js/jquery.mobile.jqmdp-1.0rc2.js"></script>
+	<script src="../../../js/jqm11/jquery.mobile-1.1.0.js"></script>
+
+	<script src="../../docs.js"></script>
+	
+	<link rel="stylesheet" href="../../samples/parts/calendar/Calendar.css" />
+	<script src="../../samples/parts/calendar/Calendar.js"></script>
+	<script src="../../samples/parts/radio/Radio.js"></script>
+	<script src="../../samples/parts/rating/Rating.js"></script>
+
+
+</head>
+
+<body >
+	<div data-role="page" id="index" >
+		<div data-role="header" data-position="fixed" data-theme="e" >
+			<h1>Samples</h1>
+			<a href="../../index.html" data-icon="back" data-ajax="false"
+				data-direction="reverse" data-iconpos="notext"></a>
+			<a href="../../index.html" data-icon="home"  data-ajax="false"
+				data-transition="none" data-iconpos="notext"></a>
+		</div>
+		<div data-role="content" >
+			<div class="left-nav">
+				<div data-dp-template="../../title.html" ></div>
+				<hr/>
+				<div data-dp-template="navi.html"></div>
+			</div>
+
+			<div class="right-nav" >
+				部品サンプルコード。<br />
+				あまり数が用意できていません。おいおい増やして行きます。
+
+				<div data-dp-template="#linkList"></div>
+			</div>
+		</div>
+		<div data-role="footer" data-position="fixed" data-dp-template="../../footer.html"></div>
+	</div>
+	
+	<div data-role="template" id="linkList"   >
+		<ul data-role="listview" data-inset="true" >
+			<li><a href="#calendar">カレンダー</a></li>
+			<li><a href="#radio">横並び選択ボタン</a></li>
+			<li><a href="#rating">星評価</a></li>
+		</ul>
+	</div>
+	
+	<!-- ============================================== -->
+	<div data-role="page" id="calendar" >
+		<div data-role="header" data-position="fixed" data-theme="e" >
+			<h1>Calender</h1>
+			<a href="#index" data-icon="back" data-ajax="false"
+				data-direction="reverse" data-iconpos="notext"></a>
+			<a href="../../index.html" data-icon="home"  data-ajax="false"
+				data-transition="none" data-iconpos="notext"></a>
+		</div>
+		<div data-role="content" >
+			<div class="left-nav">
+				<div data-dp-template="../../title.html" ></div>
+				<hr/>
+				<div data-dp-template="#linkList"></div>
+			</div>
+			
+			<div class="right-nav" >
+				普通のカレンダーです。<br />
+				そのまま張り付けたり、日付入力のダイアログにする事ができます。
+				<p/>
+				そのまま張り付け：
+				<pre>&lt;div <b>data-dp-scope="(new Calendar($this))"</b> >&lt;/div></pre>
+				<blockquote>
+<div data-dp-scope="(new Calendar($this))" ></div>
+				</blockquote>
+		
+				<p/>日付入力：
+				<pre data-dp-html="(Docs.trimHtml($('#sample2').html()))"></pre>
+				<blockquote data-dp-template="#sample2"></blockquote>
+
+				<h3>ソース</h3>
+				samples/parts/calendar/Calendar.js:
+				<pre data-dp-html="(Docs.getSrc($this,'../../samples/parts/calendar/Calendar.js'))"></pre>
+				samples/parts/calendar/Calendar.html:
+				<pre data-dp-html="(Docs.getSrc($this,'../../samples/parts/calendar/Calendar.html'))"></pre>
+				samples/parts/calendar/Calendar.css:
+				<pre data-dp-html="(Docs.getSrc($this,'../../samples/parts/calendar/Calendar.css'))"></pre>
+				
+			</div>
+
+		</div>
+		<div data-role="footer" data-position="fixed" data-dp-template="../../footer.html"></div>
+	</div>
+
+	<pre data-role="none" id="sample2" style="display:none;">
+<div data-dp-scope="{dummy:null}">
+	<input data-dp-id="inputCal" type="date" style="width:10em;display:inline;"
+		data-dp-value="($this.scope('popupCal').yyyy_mm_dd())"/>
+	<a href="#" data-role="button" data-inline="true" data-icon="grid" 
+		data-iconpos="notext" style="vertical-align:bottom;"
+		onclick="$(this).scope('popupCal').open()"
+	></a>
+	<span data-dp-id="popupCal" 
+		data-dp-scope="(new Calendar($this,{dialog:true,target:'inputCal'}))" ></span>
+</div>
+	</pre>
+
+	<!-- ============================================== -->
+	<div data-role="page" id="radio" >
+		<div data-role="header" data-position="fixed" data-theme="e" >
+			<h1>Radio button</h1>
+			<a href="#index" data-icon="back" data-ajax="false"
+				data-direction="reverse" data-iconpos="notext"></a>
+			<a href="../../index.html" data-icon="home"  data-ajax="false"
+				data-transition="none" data-iconpos="notext"></a>
+		</div>
+		<div data-role="content" >
+			<div class="left-nav">
+				<div data-dp-template="../../title.html" ></div>
+				<hr/>
+				<div data-dp-template="#linkList"></div>
+			</div>
+			
+			<div class="right-nav" >
+				横並びの選択ボタンです。<br />
+				JQMだけでも出来るのですがあまりに冗長な記法だったので部品にしました。
+				<p/>
+				１個選択：
+				<pre>&lt;span <b>data-dp-scope="(new Radio($this))"</b> >
+<b>	&lt;a data-dp-args="('a')">a&lt;/a>
+	&lt;a data-dp-args="('b')">b&lt;/a>
+	&lt;a data-dp-args="('c')">c&lt;/a>
+</b>&lt;/span>
+</pre>
+				<blockquote>
+<span data-dp-scope="(new Radio($this))" >
+	<a data-dp-args="('a')">a</a>
+	<a data-dp-args="('b')">b</a>
+	<a data-dp-args="('c')">c</a>
+</span>
+				</blockquote>
+				
+			複数選択：<br/>
+				<pre>&lt;span <b>data-dp-scope="(new Radio($this,{multi:true, values:['c','d']}))"</b> >
+<b>	&lt;a data-dp-args="('a')">a&lt;/a>
+	&lt;a data-dp-args="('b')">b&lt;/a>
+	&lt;a data-dp-args="('c')">c&lt;/a>
+	&lt;a data-dp-args="('d')">d&lt;/a>
+	&lt;a data-dp-args="('e')">e&lt;/a></b>
+&lt;/span>
+</pre>
+				<blockquote>
+<span data-dp-scope="(new Radio($this,{multi:true, values:['c','d']}))" >
+	<a data-dp-args="('a')">a</a>
+	<a data-dp-args="('b')">b</a>
+	<a data-dp-args="('c')">c</a>
+	<a data-dp-args="('d')">d</a>
+	<a data-dp-args="('e')">e</a>
+</span>
+				</blockquote>
+	
+				<h3>ソース</h3>
+				samples/parts/radio/Radio.js:
+				<pre data-dp-html="(Docs.getSrc($this,'../../samples/parts/radio/Radio.js'))"></pre>
+			</div>
+
+		</div>
+		<div data-role="footer" data-position="fixed" data-dp-template="../../footer.html"></div>
+	</div>
+
+	<!-- ============================================== -->
+	<div data-role="page" id="rating" >
+		<div data-role="header" data-position="fixed" data-theme="e" >
+			<h1>Rating</h1>
+			<a href="#index" data-icon="back" data-ajax="false"
+				data-direction="reverse" data-iconpos="notext"></a>
+			<a href="../../index.html" data-icon="home"  data-ajax="false"
+				data-transition="none" data-iconpos="notext"></a>
+		</div>
+		<div data-role="content" >
+			<div class="left-nav">
+				<div data-dp-template="../../title.html" ></div>
+				<hr/>
+				<div data-dp-template="#linkList"></div>
+			</div>
+			
+			<div class="right-nav" >
+				良く有る星評価です。<br />
+				<p/>
+				<pre>&lt;span <b>data-dp-scope="(new Rating($this,3.5))"</b> >&lt;/span></pre>
+				<blockquote>
+<span data-dp-scope="(new Rating($this,3.5))" ></span>
+				</blockquote>
+				
+	
+				<h3>ソース</h3>
+				samples/parts/rating/Rating.js:
+				<pre data-dp-html="(Docs.getSrc($this,'../../samples/parts/rating/Rating.js'))"></pre>
+				samples/parts/rating/Rating.html:
+				<pre data-dp-html="(Docs.getSrc($this,'../../samples/parts/rating/Rating.html'))"></pre>
+			</div>
+
+		</div>
+		<div data-role="footer" data-position="fixed" data-dp-template="../../footer.html"></div>
+	</div>
+	
+
+</body>
+
+</html>

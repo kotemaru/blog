@@ -1,0 +1,640 @@
+<!DOCTYPE html> 
+<html> 
+	<head> 
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta id="viewport" name="viewport"
+		content="width=auto; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;" />
+	<title>jqmdp demo page</title> 
+
+	<link rel="stylesheet" href="../../docs.css" />
+	<link rel="stylesheet" href="../../../js/jqm11/jquery.mobile-1.1.0.min.css" />
+	<script src="../../../js/jquery-1.7.1.js"></script>
+
+	<script src="../../../js/jquery.mobile.jqmdp-1.0rc2.js"></script>
+	<script src="../../../js/jqm11/jquery.mobile-1.1.0.js"></script>
+
+</head>
+
+<body >
+<!-- ======================================================================== -->
+	<div data-role="page" id="index" >
+		<div data-role="header" data-position="fixed" data-theme="e" >
+			<h1>Replace attributes</h1>
+			<a href="../../index.html" data-icon="back" data-ajax="false"
+				data-direction="reverse" data-iconpos="notext"></a>
+			<a href="../../index.html" data-icon="home"  data-ajax="false"
+				data-transition="none" data-iconpos="notext"></a>
+		</div>
+		<div data-role="content" >
+			<div class="left-nav">
+				<div data-dp-template="../../title.html" ></div>
+				<hr/>
+				<div data-dp-template="navi.html"></div>
+			</div>
+
+			<div class="right-nav" >
+<h2>置換属性</h2>
+<p>
+データ置換にかかわるカスタム属性である。
+</p>
+	
+<p>
+属性値は JavaScript の式であり
+data-dp-scope 属性によって定義されたスコープの中で評価される。
+<br/>
+スコープ内から参照可能な変数は以下の通りである。
+<ul>
+	<li>$this : 属性の指定された要素の jQuery object。</li>
+	<li>data-dp-scope 属性で定義された<a href="../../docs/concept/scope.html">スコープ インスタンス</a>のプロパティ。</li>
+	<li>グローバルスコープのプロパティ。(window, document 等)</li>
+</ul>
+
+</p>
+
+<p>
+置換属性が評価されるのは pagebeforeshow イベントのタイミングである。
+ページ表示以外のタイミングで評価する為の API $.jqmdp.refresh() が用意されている。
+</p>
+<p>
+注：現在の JavaScript 仕様は eval() 関数に this が渡せない為、
+やむをえず $this を使用している。
+これにより、当該要素を表すのにイベント属性では $(this)、
+置換属性では $this となってしまう。
+</p>
+<div data-dp-template="#replaceAttrLinkList"></div>
+			</div>
+		</div>
+		<div data-role="footer" data-position="fixed" data-dp-template="../../footer.html"></div>
+	</div>
+	
+	<div data-role="template" id="replaceAttrLinkList"   >
+		<ul data-role="listview" data-inset="true" >
+			<li><a href="#data-dp-text">data-dp-text属性</a></li>
+			<li><a href="#data-dp-html">data-dp-html属性</a></li>
+			<li><a href="#data-dp-src">data-dp-src属性</a></li>
+			<li><a href="#data-dp-href">data-dp-href属性</a></li>
+			<li><a href="#data-dp-value">data-dp-value属性</a></li>
+			<li><a href="#data-dp-show">data-dp-show属性</a></li>
+			<li><a href="#data-dp-class">data-dp-class属性</a></li>
+			<li><a href="#data-dp-args">data-dp-args属性</a></li>
+		</ul>
+	</div>
+
+<!-- ======================================================================== -->
+
+	<div data-role="page" id="data-dp-text"  data-dp-scope="({})">
+		<div data-role="header" data-position="fixed" data-theme="e" >
+			<h1>Replace attributes</h1>
+			<a href="#index" data-icon="back" 
+				data-direction="reverse" data-iconpos="notext"></a>
+			<a href="../../index.html" data-icon="home"  data-ajax="false"
+				data-transition="none" data-iconpos="notext"></a>
+		</div>
+		<div data-role="content" >
+			<div class="left-nav">
+				<div data-dp-template="../../title.html" ></div>
+				<hr/>
+<div data-dp-template="#replaceAttrLinkList"></div>
+			</div>
+
+			<div class="right-nav" >
+<h2>data-dp-text 属性</h2>
+<p>
+この属性を設定された HTML 要素の子要素が属性値の評価結果に置き換わる。
+評価結果は文字列に変換され「&lt;」や「&amp;」はエスケープされる。
+
+</p>
+
+<p>
+記述例：
+<pre>&lt;div data-dp-scope="(new Date())">
+	&lt;div>Date:
+		&lt;span <b>data-dp-text="(getFullYear())"</b>>&lt;/span> /
+		&lt;span <b>data-dp-text="(getMonth()+1)"</b>>&lt;/span> /
+		&lt;span <b>data-dp-text="(getDate())"</b>>&lt;/span>
+	&lt;/div>
+&lt;/div>
+</pre>
+
+実行結果：
+<blockquote data-dp-id="example">
+<div data-dp-scope="(new Date())">
+	<div>Date:
+		<span data-dp-text="(getFullYear())"></span> /
+		<span data-dp-text="(getMonth()+1)"></span> /
+		<span data-dp-text="(getDate())"></span>
+	</div>
+</div>
+</blockquote>
+<p/>
+
+			</div>
+		</div>
+		<div data-role="footer" data-position="fixed" data-dp-template="../../footer.html"></div>
+	</div>
+	
+<!-- ======================================================================== -->
+
+	<div data-role="page" id="data-dp-html"  data-dp-scope="({})">
+		<div data-role="header" data-position="fixed" data-theme="e" >
+			<h1>Replace attributes</h1>
+			<a href="#index" data-icon="back" 
+				data-direction="reverse" data-iconpos="notext"></a>
+			<a href="../../index.html" data-icon="home"  data-ajax="false"
+				data-transition="none" data-iconpos="notext"></a>
+		</div>
+		<div data-role="content" >
+			<div class="left-nav">
+				<div data-dp-template="../../title.html" ></div>
+				<hr/>
+<div data-dp-template="#replaceAttrLinkList"></div>
+			</div>
+
+			<div class="right-nav" >
+<h2>data-dp-html 属性</h2>
+<p>
+この属性を設定された HTML 要素の子要素が属性値の評価結果に置き換わる。
+評価結果は HTML に変換される
+
+</p>
+
+<p>
+記述例：
+<pre>&lt;div data-dp-scope="({list:{itaric:'i',bold:'b',strike:'s'},k:0})">
+  &lt;ul data-dp-for="(k in list)">
+    &lt;li <b>data-dp-html="('&lt;'+list[k]+'>'+k+'&lt;/'+list[k]+'>')"</b>>&lt;/li>
+  &lt;/ul>
+&lt;/div>
+</pre>
+
+実行結果：
+<blockquote data-dp-id="example">
+<div data-dp-scope="({list:{itaric:'i',bold:'b',strike:'s'},k:0})">
+	<ul data-dp-for="(k in list)">
+		<li data-dp-html="('<'+list[k]+'>'+k+'</'+list[k]+'>')"></li>
+	</ul>
+</div>
+</blockquote>
+<p/>
+			</div>
+		</div>
+		<div data-role="footer" data-position="fixed" data-dp-template="../../footer.html"></div>
+	</div>
+	
+<!-- ======================================================================== -->
+
+	<div data-role="page" id="data-dp-src"  data-dp-scope="({})">
+		<div data-role="header" data-position="fixed" data-theme="e" >
+			<h1>Replace attributes</h1>
+			<a href="#index" data-icon="back" 
+				data-direction="reverse" data-iconpos="notext"></a>
+			<a href="../../index.html" data-icon="home"  data-ajax="false"
+				data-transition="none" data-iconpos="notext"></a>
+		</div>
+		<div data-role="content" >
+			<div class="left-nav">
+				<div data-dp-template="../../title.html" ></div>
+				<hr/>
+<div data-dp-template="#replaceAttrLinkList"></div>
+			</div>
+
+			<div class="right-nav" >
+<h2>data-dp-src 属性</h2>
+<p>
+この属性を設定された IMG 要素の src 属性が data-dp-src 属性値の評価結果に置き換わる。
+</p>
+
+<p>
+記述例：
+<pre>&lt;div data-dp-scope="(new ImageManager($this))">
+  &lt;div style="height:200px;">
+    &lt;img <b>data-dp-src="(current())"</b> />
+  &lt;/div>
+  &lt;a href="#" data-role="button" data-icon="arrow-l" 
+    data-iconpos="notext" data-inline="true"
+    onclick="$.scope(this).next(-1)">&lt;/a>
+  &lt;a href="#" data-role="button" data-icon="arrow-r" 
+    data-iconpos="notext" data-inline="true"
+    onclick="$.scope(this).next(1)">&lt;/a>
+&lt;/div>
+
+&lt;script>
+  function ImageManager($this) {
+    this.$this = $this;
+    this.pos = 0;
+    this.images = [
+      "castle.jpeg","cat.jpeg","lea.jpeg","sakura.jpeg","sunset.jpeg"
+      ];
+  }
+  ImageManager.prototype.current = function(){
+    return "../../images/photo/"+this.images[this.pos];
+  }
+  ImageManager.prototype.next = function(delta) {
+    with (this) {
+      pos += delta;
+      if (pos &lt; 0) pos = images.length-1;
+      if (pos >= images.length) pos = 0;
+      $this.jqmdp().refresh();
+    }
+  }
+&lt;/script>
+</pre>
+
+実行結果：
+<blockquote data-dp-id="example">
+<div data-dp-scope="(new ImageManager($this))">
+  <div style="height:200px;">
+    <img data-dp-src="(current())" />
+  </div>
+  <a href="#" data-role="button" data-icon="arrow-l" data-iconpos="notext" data-inline="true"
+    onclick="$.scope(this).next(-1)"></a>
+  <a href="#" data-role="button" data-icon="arrow-r" data-iconpos="notext" data-inline="true"
+    onclick="$.scope(this).next(1)"></a>
+</div>
+
+<script>
+  function ImageManager($this) {
+    this.$this = $this;
+    this.pos = 0;
+    this.images = [
+      "castle.jpeg","cat.jpeg","lea.jpeg","sakura.jpeg","sunset.jpeg"
+      ];
+  }
+  ImageManager.prototype.current = function(){
+    return "../../images/photo/"+this.images[this.pos];
+  }
+  ImageManager.prototype.next = function(delta) {
+    with (this) {
+      pos += delta;
+      if (pos < 0) pos = images.length-1;
+      if (pos >= images.length) pos = 0;
+      $this.jqmdp().refresh();
+    }
+  }
+</script>
+</blockquote>
+<p/>
+			</div>
+		</div>
+		<div data-role="footer" data-position="fixed" data-dp-template="../../footer.html"></div>
+	</div>
+	
+<!-- ======================================================================== -->
+
+	<div data-role="page" id="data-dp-href"  data-dp-scope="({})">
+		<div data-role="header" data-position="fixed" data-theme="e" >
+			<h1>Replace attributes</h1>
+			<a href="#index" data-icon="back" 
+				data-direction="reverse" data-iconpos="notext"></a>
+			<a href="../../index.html" data-icon="home"  data-ajax="false"
+				data-transition="none" data-iconpos="notext"></a>
+		</div>
+		<div data-role="content" >
+			<div class="left-nav">
+				<div data-dp-template="../../title.html" ></div>
+				<hr/>
+<div data-dp-template="#replaceAttrLinkList"></div>
+			</div>
+
+			<div class="right-nav" >
+<h2>data-dp-href 属性</h2>
+<p>
+この属性を設定された A 要素の href 属性が data-dp-href 属性値の評価結果に置き換わる。
+</p>
+
+<p>
+記述例：
+<pre>&lt;div data-dp-scope="({})">
+  &lt;font size="7">
+    &lt;a target="_blank"
+      <b>data-dp-href="($this.jqmdp('linkSelect').children(':selected').val())"</b>
+      data-dp-text="($this.jqmdp('linkSelect').children(':selected').text())"
+    >&lt;/a>
+  &lt;/font>
+
+  &lt;select data-dp-id="linkSelect" onchange="$.jqmdp(this).refresh()">
+    &lt;option value="http://google.com">Google&lt;/option>
+    &lt;option value="http://yahoo.com">Yahoo&lt;/option>
+    &lt;option value="http://wikipedia.org">Wiki&lt;/option>
+  &lt;/select>
+&lt;/div>
+</pre>
+
+実行結果：
+<blockquote data-dp-id="example">
+<div data-dp-scope="({})">
+	<font size="7">
+		<a target="_blank"
+			data-dp-href="($this.jqmdp('linkSelect').children(':selected').val())" 
+			data-dp-text="($this.jqmdp('linkSelect').children(':selected').text())"
+		></a>
+	</font>
+
+
+	<select data-dp-id="linkSelect" onchange="$.jqmdp(this).refresh()">
+		<option value="http://google.com">Google</option>
+		<option value="http://yahoo.com">Yahoo</option>
+		<option value="http://wikipedia.org">Wiki</option>
+	</select>
+</div>
+</blockquote>
+<p/>
+			</div>
+		</div>
+		<div data-role="footer" data-position="fixed" data-dp-template="../../footer.html"></div>
+	</div>
+	
+<!-- ======================================================================== -->
+
+	<div data-role="page" id="data-dp-value"  data-dp-scope="({})">
+		<div data-role="header" data-position="fixed" data-theme="e" >
+			<h1>Replace attributes</h1>
+			<a href="#index" data-icon="back" 
+				data-direction="reverse" data-iconpos="notext"></a>
+			<a href="../../index.html" data-icon="home"  data-ajax="false"
+				data-transition="none" data-iconpos="notext"></a>
+		</div>
+		<div data-role="content" >
+			<div class="left-nav">
+				<div data-dp-template="../../title.html" ></div>
+				<hr/>
+<div data-dp-template="#replaceAttrLinkList"></div>
+			</div>
+
+			<div class="right-nav" >
+<h2>data-dp-value 属性</h2>
+<p>
+この属性を設定された input 要素の値が data-dp-value 属性値の評価結果に置き換わる。
+</p>
+
+<p>
+記述例：
+<pre>&lt;div data-dp-scope="({fname:'Jone', lname:'Smith', email:'test@example.com'})">
+  &lt;form>
+    &lt;div>first name:&lt;input name="fname" <b>data-dp-value="(fname)"</b>/>&lt;/div>
+    &lt;div>last name:&lt;input name="lname"  <b>data-dp-value="(lname)"</b>/>&lt;/div>
+    &lt;div>e-mail:&lt;input name="email"  <b>data-dp-value="(email)"</b>/>&lt;/div>
+  &lt;/form>
+&lt;/div>
+</pre>
+
+実行結果：
+<blockquote data-dp-id="example">
+<div data-dp-scope="({fname:'Jone', lname:'Smith', email:'test@example.com'})">
+	<form>
+		<div>first name:<input name="fname" data-dp-value="(fname)"/></div>
+		<div>last name:<input name="lname"  data-dp-value="(lname)"/></div>
+		<div>e-mail:<input name="email"  data-dp-value="(email)"/></div>
+	</form>
+</div>
+</blockquote>
+<p/>
+			</div>
+		</div>
+		<div data-role="footer" data-position="fixed" data-dp-template="../../footer.html"></div>
+	</div>
+	
+<!-- ======================================================================== -->
+
+	<div data-role="page" id="data-dp-show"  data-dp-scope="({})">
+		<div data-role="header" data-position="fixed" data-theme="e" >
+			<h1>Replace attributes</h1>
+			<a href="#index" data-icon="back" 
+				data-direction="reverse" data-iconpos="notext"></a>
+			<a href="../../index.html" data-icon="home"  data-ajax="false"
+				data-transition="none" data-iconpos="notext"></a>
+		</div>
+		<div data-role="content" >
+			<div class="left-nav">
+				<div data-dp-template="../../title.html" ></div>
+				<hr/>
+<div data-dp-template="#replaceAttrLinkList"></div>
+			</div>
+
+			<div class="right-nav" >
+<h2>data-dp-show 属性</h2>
+<p>
+この属性を設定された要素が data-dp-show 属性値の評価結果によって表示／非表示になる。
+属性値は boolean に変換され false の場合、要素は非表示となる。
+</p>
+
+<p>
+記述例：
+<pre>&lt;div data-dp-scope="({i:0})">
+  &lt;div data-dp-for="(i=0; i&lt;10; i++)">
+    &lt;div <b>data-dp-show="(i%2==1)"</b>>&lt;span data-dp-text="(i)">&lt;/span>=odd&lt;/div>
+    &lt;div <b>data-dp-show="(i%2==0)"</b>>&lt;span data-dp-text="(i)">&lt;/span>=even&lt;/div>
+  &lt;/div>
+&lt;/div>
+</pre>
+
+実行結果：
+<blockquote data-dp-id="example">
+<div data-dp-scope="({i:0})">
+	<div data-dp-for="(i=0; i<10; i++)">
+		<div data-dp-show="(i%2==1)"><span data-dp-text="(i)"></span>=odd</div>
+		<div data-dp-show="(i%2==0)"><span data-dp-text="(i)"></span>=even</div>
+	</div>
+</div>
+</blockquote>
+<p/>
+			</div>
+		</div>
+		<div data-role="footer" data-position="fixed" data-dp-template="../../footer.html"></div>
+	</div>
+<!-- ======================================================================== -->
+
+	<div data-role="page" id="data-dp-class"  data-dp-scope="({})">
+		<div data-role="header" data-position="fixed" data-theme="e" >
+			<h1>Replace attributes</h1>
+			<a href="#index" data-icon="back" 
+				data-direction="reverse" data-iconpos="notext"></a>
+			<a href="../../index.html" data-icon="home"  data-ajax="false"
+				data-transition="none" data-iconpos="notext"></a>
+		</div>
+		<div data-role="content" >
+			<div class="left-nav">
+				<div data-dp-template="../../title.html" ></div>
+				<hr/>
+<div data-dp-template="#replaceAttrLinkList"></div>
+			</div>
+
+			<div class="right-nav" >
+<h2>data-dp-class 属性</h2>
+<p>
+この属性を設定された要素の class が属性値の評価結果によって変化する。
+</p>
+<p>
+この属性値は配列でなければならない。
+配列の最初の項目は真偽値であり以降はCSSクラス名である。
+最初の項目が true ならばCSSクラスが全て当該要素に設定される。
+false ならば削除される。
+</p>
+
+<p>
+記述例：
+<pre>&lt;style>
+  .odd-class {
+    color: red;
+  }
+&lt;/style>
+&lt;div data-dp-scope="({i:0})">
+  &lt;div data-dp-for="(i=0; i&lt;10; i++)">
+    &lt;span <b>data-dp-class="([i%2==1,'odd-class'])"</b> data-dp-text="(i)">&lt;/span>
+  &lt;/div>
+&lt;/div>
+</pre>
+
+実行結果：
+<blockquote data-dp-id="example">
+<style>
+	.odd-class {
+		color: red;
+	}
+</style>
+<div data-dp-scope="({i:0})">
+	<div data-dp-for="(i=0; i<10; i++)">
+		<span data-dp-class="([i%2==1,'odd-class'])" data-dp-text="(i)"></span>
+	</div>
+</div>
+</blockquote>
+<p/>
+			</div>
+		</div>
+		<div data-role="footer" data-position="fixed" data-dp-template="../../footer.html"></div>
+	</div>
+	
+<!-- ======================================================================== -->
+
+	<div data-role="page" id="data-dp-template"  data-dp-scope="({})">
+		<div data-role="header" data-position="fixed" data-theme="e" >
+			<h1>Replace attributes</h1>
+			<a href="#index" data-icon="back" 
+				data-direction="reverse" data-iconpos="notext"></a>
+			<a href="../../index.html" data-icon="home"  data-ajax="false"
+				data-transition="none" data-iconpos="notext"></a>
+		</div>
+		<div data-role="content" >
+			<div class="left-nav">
+				<div data-dp-template="../../title.html" ></div>
+				<hr/>
+<div data-dp-template="#replaceAttrLinkList"></div>
+			</div>
+
+			<div class="right-nav" >
+<h2>data-dp-template 属性</h2>
+<p>
+この属性を設定された要素の子要素が属性値の URL で示された要素の子要素に置き換わる。
+<br />URL が「#」で始まらない場合、外部HTMLファイルとして読み込みソースとする。
+<br />URL が「#」で始まる場合、その値を id とする現在のドキュメント内の要素をソースとする。
+</p>
+<p>
+ドキュメント内の要素をソースとする場合、幾つかの制限がある。
+<ul>
+	<li>&lt;div data-role=page>タグの外側に無ければならない。</li>
+	<li>&lt;a data-ajax=true>タグから読み込んだHTML無いの要素はソースと出来ない。
+		data-ajax=true はデフォルトなので注意。</li>
+</ul>
+
+</p>
+
+
+<p>
+記述例：
+<pre>&lt;div <b>data-dp-template="../../footer.html"</b>>&lt;/div>
+&lt;div <b>data-dp-template="#innerTemplate"</b>>&lt;/div>
+</pre>
+
+外部テンプレート定義：(外部ファイル footer.html に)
+<pre>
+&lt;div data-role="none">
+(c)2011 kotemaru.org
+&lt;/div>
+</pre>
+
+内部テンプレート定義：(&lt;body>直下に)
+<pre>
+&lt;div data-role="none" id="innerTemplate" >
+	&lt;b>Innter template sample&lt;/b>
+&lt;/div>
+</pre>
+
+実行結果：
+<blockquote data-dp-id="example">
+	<div data-dp-template="../../footer.html"></div>
+	<div data-dp-template="#innerTemplate"></div>
+</blockquote>
+<p/>
+			</div>
+		</div>
+		<div data-role="footer" data-position="fixed" data-dp-template="../../footer.html"></div>
+	</div>
+<!-- ======================================================================== -->
+
+	<div data-role="page" id="data-dp-args"  data-dp-scope="({})">
+		<div data-role="header" data-position="fixed" data-theme="e" >
+			<h1>Replace attributes</h1>
+			<a href="#index" data-icon="back" 
+				data-direction="reverse" data-iconpos="notext"></a>
+			<a href="../../index.html" data-icon="home"  data-ajax="false"
+				data-transition="none" data-iconpos="notext"></a>
+		</div>
+		<div data-role="content" >
+			<div class="left-nav">
+				<div data-dp-template="../../title.html" ></div>
+				<hr/>
+<div data-dp-template="#replaceAttrLinkList"></div>
+			</div>
+
+			<div class="right-nav" >
+<h2>data-dp-args 属性</h2>
+<p>
+この属性を設定された要素の data-dp-vals 属性が属性値の評価結果になる。
+data-dp-vals 属性の値は API $.jqmdp.args() 関数によって取得できる。
+</p>
+<p>
+この属性は通常 data-dp-for 属性で展開される要素のイベント処理と組み合わせて使用する。
+ループで展開された要素が自身がどのループ条件で生成された物であるか知ることができる。
+</p>
+<p>
+この属性に動的な値(関数等)を設定すべきでは無い。
+更新のタイミングが制御できないので不定値となってしまう。
+参照時にまだ値が決まっていない場合は pageinit イベントで refresh() を呼び出せば回避できる。
+</p>
+<p>
+記述例：
+<pre>&lt;div data-dp-scope="({list:window.location, k:0})">
+  &lt;ul data-dp-for="(k in list)" data-role="listview" >
+    &lt;li onclick="alert(<b>$.jqmdp(this).args()</b>)" 
+          <b>data-dp-args="(k)"</b>
+          data-dp-text="(list[k])" >&lt;/li>
+  &lt;/ul>
+&lt;/div>
+</pre>
+
+実行結果：
+<blockquote data-dp-id="example" style="padding: 20px;">
+<div data-dp-scope="({list:window.location, k:0})">
+	<ul data-dp-for="(k in list)" data-role="listview" >
+		<li onclick="alert($.jqmdp(this).args())" 
+					data-dp-args="(k)"
+					data-dp-text="(list[k])" ></li>
+	</ul>
+</div>
+</blockquote>
+<p/>
+			</div>
+		</div>
+		<div data-role="footer" data-position="fixed" data-dp-template="../../footer.html"></div>
+	</div>
+	
+<!-- ======================================================================== -->
+
+	<div data-role="none" id="innerTemplate" >
+		<b>Innter template sample. </b>
+	</div>
+	
+</body>
+
+</html>

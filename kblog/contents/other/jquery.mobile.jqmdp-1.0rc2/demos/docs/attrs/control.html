@@ -1,0 +1,278 @@
+<!DOCTYPE html> 
+<html> 
+	<head> 
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta id="viewport" name="viewport"
+		content="width=auto; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;" />
+	<title>jqmdp demo page</title> 
+
+	
+
+	<link rel="stylesheet" href="../../docs.css" />
+	<link rel="stylesheet" href="../../../js/jqm11/jquery.mobile-1.1.0.min.css" />
+	<script src="../../../js/jquery-1.7.1.js"></script>
+
+	<script src="../../../js/jquery.mobile.jqmdp-1.0rc2.js"></script>
+	<script src="../../../js/jqm11/jquery.mobile-1.1.0.js"></script>
+
+</head>
+
+<body >
+<!-- ======================================================================== -->
+	<div data-role="page" id="index" >
+		<div data-role="header" data-position="fixed" data-theme="e" >
+			<h1>Control attributes</h1>
+			<a href="../../index.html" data-icon="back" data-ajax="false"
+				data-direction="reverse" data-iconpos="notext"></a>
+			<a href="../../index.html" data-icon="home"  data-ajax="false"
+				data-transition="none" data-iconpos="notext"></a>
+		</div>
+		<div data-role="content" >
+			<div class="left-nav">
+				<div data-dp-template="../../title.html" ></div>
+				<hr/>
+				<div data-dp-template="navi.html"></div>
+			</div>
+
+			<div class="right-nav" >
+<h2>制御構文属性</h2>
+<p>
+制御構文にかかわるカスタム属性である。<br/>
+条件付き要素の存在と要素の繰り返しが記述できる。
+</p>
+	
+<p>
+HTML に制御構文を記述する事には無理が有り、本来推奨されないと思われる。
+しかしながら現実的な利便性を鑑みると最低限の制御構文は必要と考える。
+</p>
+
+<p>
+制限事項：
+<ul>
+	<li>現在のところ制御構文の内側でスコープを使用する事はできない。</li>
+</ul>
+</p>
+
+<div data-dp-template="#controllAttrLinkList"></div>
+			</div>
+		</div>
+		<div data-role="footer" data-position="fixed" data-dp-template="../../footer.html"></div>
+	</div>
+	
+	<div data-role="template" id="controllAttrLinkList"   >
+		<ul data-role="listview" data-inset="true" >
+			<li><a href="#data-dp-for">data-dp-for</a></li>
+			<li><a href="#data-dp-if">data-dp-if</a></li>
+			<li><a href="#data-dp-if-self">data-dp-if-self</a></li>
+		</ul>
+	</div>
+
+<!-- ======================================================================== -->
+
+	<div data-role="page" id="data-dp-for"  data-dp-scope="({})">
+		<div data-role="header" data-position="fixed" data-theme="e" >
+			<h1>Replace attributes</h1>
+			<a href="#index" data-icon="back" 
+				data-direction="reverse" data-iconpos="notext"></a>
+			<a href="../../index.html" data-icon="home"  data-ajax="false"
+				data-transition="none" data-iconpos="notext"></a>
+		</div>
+		<div data-role="content" >
+			<div class="left-nav">
+				<div data-dp-template="../../title.html" ></div>
+				<hr/>
+<div data-dp-template="#controllAttrLinkList"></div>
+			</div>
+
+			<div class="right-nav" >
+<h2>data-dp-for 属性</h2>
+
+<p>この属性を設定された要素の子要素は属性値の条件にしたがって繰り返される。
+</p>
+<p>属性値の条件は JavaScript の for 文の条件と同じである。
+但し、繰り返し条件に使われる変数は
+<a href="../../docs/concept/scope.html">スコープ インスタンス</a>
+に存在しなければならない。
+</p>
+</p>
+
+<p>
+記述例：
+<pre>&lt;div data-dp-scope="({list:{a:'A',b:'B',c:'C'},i:0})">
+  &lt;div <b>data-dp-for="(i=0; i&lt;4; i++)"</b>>
+    &lt;span data-dp-text="(i)">&lt;/span>
+  &lt;/div>
+  &lt;div <b>data-dp-for="(i in list)"</b>>
+    &lt;span data-dp-text="(i)">&lt;/span>=&lt;span data-dp-text="(list[i])">&lt;/span>
+  &lt;/div>
+&lt;/div>
+</pre>
+
+実行結果：
+<blockquote data-dp-id="example">
+<div data-dp-scope="({list:{a:'A',b:'B',c:'C'},i:0})">
+	<div data-dp-for="(i=0; i<4; i++)">
+		<span data-dp-text="(i)"></span>
+	</div>
+	<div data-dp-for="(i in list)">
+		<span data-dp-text="(i)"></span>=<span data-dp-text="(list[i])"></span>
+	</div>
+</div>
+</blockquote>
+<p/>
+			</div>
+		</div>
+		<div data-role="footer" data-position="fixed" data-dp-template="../../footer.html"></div>
+	</div>
+	
+<!-- ======================================================================== -->
+	
+	<div data-role="page" id="data-dp-if"  data-dp-scope="({})">
+		<div data-role="header" data-position="fixed" data-theme="e" >
+			<h1>Replace attributes</h1>
+			<a href="#index" data-icon="back" 
+				data-direction="reverse" data-iconpos="notext"></a>
+			<a href="../../index.html" data-icon="home"  data-ajax="false"
+				data-transition="none" data-iconpos="notext"></a>
+		</div>
+		<div data-role="content" >
+			<div class="left-nav">
+				<div data-dp-template="../../title.html" ></div>
+				<hr/>
+<div data-dp-template="#controllAttrLinkList"></div>
+			</div>
+
+			<div class="right-nav" >
+<h2>data-dp-if 属性</h2>
+
+<p>この属性を設定された要素の子要素は属性値の条件により削除される。
+</p>
+<p>属性値の条件は JavaScript の if 文の条件と同じである。
+<br />
+属性値の評価結果が false になる場合、子要素は削除される。
+data-dp-show と違いは単なる非表示ではなく実際に子要素のノード自体が無くなる事である。
+</p>
+
+<p>
+記述例：
+<pre>&lt;div data-dp-scope="({value:'abc'})">
+  &lt;div>test-1:
+    &lt;span <b>data-dp-if="(value=='abc')</b>">
+      &lt;span id='test-1'>test-1&lt;/span>
+    &lt;/span>
+  &lt;/div>
+  &lt;div>test-2:
+    &lt;span <b>data-dp-if="(value=='def')</b>">
+      &lt;span id='test-2'>test-2&lt;/span>
+    &lt;/span>
+  &lt;/div>
+  &lt;div>test-3:
+    &lt;span data-dp-show="(value=='def')">
+      &lt;span id='test-3'>test-3&lt;/span>
+    &lt;/span>
+  &lt;/div>
+
+  &lt;hr/>
+
+  &lt;div>#test-1= &lt;span data-dp-text="(document.getElementById('test-1'))">&lt;/span>&lt;/div>
+  &lt;div>#test-2= &lt;span data-dp-text="(document.getElementById('test-2'))">&lt;/span>&lt;/div>
+  &lt;div>#test-3= &lt;span data-dp-text="(document.getElementById('test-3'))">&lt;/span>&lt;/div>
+&lt;/div>
+</pre>
+
+実行結果：
+<blockquote data-dp-id="example">
+<div data-dp-scope="({value:'abc'})">
+	<div>data-dp-if=true:
+		<span data-dp-if="(value=='abc')">
+			<span id='test-1'>test-1</span>
+		</span>
+	</div>
+	<div>data-dp-if=false:
+		<span data-dp-if="(value=='def')">
+			<span id='test-2'>test-2</span>
+		</span>
+	</div>
+	<div>data-dp-show=false:
+		<span data-dp-show="(value=='def')">
+			<span id='test-3'>test-3</span>
+		</span>
+	</div>
+
+	<hr/>
+
+	<div>#child of data-dp-if=true : <span data-dp-text="(document.getElementById('test-1'))"></span></div>
+	<div>#child of data-dp-if=false : <span data-dp-text="(document.getElementById('test-2'))"></span></div>
+	<div>#child of data-dp-show=false : <span data-dp-text="(document.getElementById('test-3'))"></span></div>
+</div>
+</blockquote>
+<p/>
+			</div>
+		</div>
+		<div data-role="footer" data-position="fixed" data-dp-template="../../footer.html"></div>
+	</div>
+
+<!-- ======================================================================== -->
+	<div data-role="page" id="data-dp-if-self"  data-dp-scope="({})">
+		<div data-role="header" data-position="fixed" data-theme="e" >
+			<h1>Replace attributes</h1>
+			<a href="#index" data-icon="back" 
+				data-direction="reverse" data-iconpos="notext"></a>
+			<a href="../../index.html" data-icon="home"  data-ajax="false"
+				data-transition="none" data-iconpos="notext"></a>
+		</div>
+		<div data-role="content" >
+			<div class="left-nav">
+				<div data-dp-template="../../title.html" ></div>
+				<hr/>
+<div data-dp-template="#controllAttrLinkList"></div>
+			</div>
+
+			<div class="right-nav" >
+<h2>data-dp-if-self 属性</h2>
+
+<p>この属性を設定された要素は属性値の条件により削除される。
+</p>
+<p>data-dp-if 属性とは削除されるのが子要素か自身の要素かの違いが有る。
+<br />
+自身を削除してしまうため一度、属性値が false となると再描画しても復活しない。
+但し、data-dp-for 要素の内側では繰り返し時の複製により復活する。
+</p>
+
+<p>
+記述例：
+<pre>&lt;div data-dp-scope="({list:window.location, key:0})">
+  &lt;ul data-dp-for="(key in list)" data-role="listview" >
+    &lt;li <b>data-dp-if-self="(key=='hostname' || key=='port' || key=='hash')"</b>>
+      &lt;span data-dp-text="(key)">&lt;/span> = &lt;span data-dp-text="(list[key])">&lt;/span>
+    &lt;/li>
+  &lt;/ul>
+&lt;/div>
+</pre>
+
+実行結果：
+<blockquote style="padding:20px;">
+<div data-dp-scope="({list:window.location, key:0})">
+	<ul data-dp-for="(key in list)" data-role="listview" >
+		<li data-dp-if-self="(key=='hostname' || key=='port' || key=='hash')">
+			<span data-dp-text="(key)"></span> = <span data-dp-text="(list[key])"></span>
+		</li>
+	</ul>
+</div>
+</blockquote>
+<p/>
+			</div>
+		</div>
+		<div data-role="footer" data-position="fixed" data-dp-template="../../footer.html"></div>
+	</div>
+
+<!-- ======================================================================== -->
+
+	<div data-role="none" id="innerTemplate" >
+		<b>Innter template sample. </b>
+	</div>
+	
+</body>
+
+</html>

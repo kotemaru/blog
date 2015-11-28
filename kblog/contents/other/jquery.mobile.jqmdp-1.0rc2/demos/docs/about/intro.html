@@ -1,0 +1,60 @@
+<!DOCTYPE html> 
+<html> 
+	<head> 
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta id="viewport" name="viewport"
+		content="width=auto; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;" />
+	<title>jqmdp demo page</title> 
+
+	
+
+	<link rel="stylesheet" href="../../docs.css" />
+	<link rel="stylesheet" href="../../../js/jqm11/jquery.mobile-1.1.0.min.css" />
+	<script src="../../../js/jquery-1.7.1.js"></script>
+
+	<script src="../../../js/jquery.mobile.jqmdp-1.0rc2.js"></script>
+	<script src="../../../js/jqm11/jquery.mobile-1.1.0.js"></script>
+</head>
+
+<body >
+
+	<div data-role="page" id="index" >
+		<div data-role="header" data-theme="e" >
+			<h1>Introduction</h1>
+			<a href="../../index.html" data-icon="back" data-ajax="false"
+				data-direction="reverse" data-iconpos="notext"></a>
+			<a href="../../index.html" data-icon="home" data-ajax="false"
+				data-transition="none" data-iconpos="notext"></a>
+		</div>
+		<div data-role="content" >
+			<div class="left-nav">
+				<div data-dp-template="../../title.html" ></div>
+				<hr/>
+				<div data-dp-template="navi.html"></div>
+			</div>
+			<div class="right-nav" >
+<h2>JQMDP とは</h2>
+<p>JQMDP は jQuery Mobile Dynamic Page plugin の略である。</p>
+
+<p>
+jQuery mobile は単独では動的なWebページを表示する機能をほとんど持たない。
+そのためクライアント側で動的なページを作成しようとした場合、
+多くのJavaScriptコードを記述する必要がある。
+</p>
+<p>
+JQMDP はわずかなコードで jQuery mobile
+に動的なページを記述する事を目的としたプラグインである。
+</p>
+<p>
+注：jQuery mobile は JavaScript 無しの環境に置いても動作する
+HTML の記述を推奨している。
+JQMDP はその目的から JavaScript は必須としている。
+</p>
+			</div>
+		</div>
+		<div data-role="footer" data-position="fixed" data-dp-template="../../footer.html"></div>
+	</div>
+</body>
+
+</html>

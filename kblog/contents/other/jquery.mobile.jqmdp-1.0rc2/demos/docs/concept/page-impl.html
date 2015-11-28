@@ -1,0 +1,95 @@
+<!DOCTYPE html> 
+<html> 
+	<head> 
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta id="viewport" name="viewport"
+		content="width=auto; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;" />
+	<title>jqmdp demo page</title> 
+	
+	
+
+	<link rel="stylesheet" href="../../docs.css" />
+	<link rel="stylesheet" href="../../../js/jqm11/jquery.mobile-1.1.0.min.css" />
+	<script src="../../../js/jquery-1.7.1.js"></script>
+
+	<script src="../../../js/jquery.mobile.jqmdp-1.0rc2.js"></script>
+	<script src="../../../js/jqm11/jquery.mobile-1.1.0.js"></script>
+	<script src="../../docs.js"></script>
+
+	<script>
+var basicHtml = "";
+var basicJs = "";
+$(function(){
+	$.get("../../samples/basic/basic.html", null, function(data){
+		basicHtml = Docs.trimHtml(data);
+		$("#index").jqmdp().refresh();
+	});
+	$.get("../../samples/basic/basic.js", null, function(data){
+		basicJs = Docs.trimJs(data);
+		$("#index").jqmdp().refresh();
+	});
+})
+	</script>
+
+</head>
+
+<body >
+	<div data-role="page" id="index" >
+		<div data-role="header" data-position="fixed" data-theme="e" >
+			<h1>Basic style</h1>
+			<a href="../../index.html" data-icon="back" data-ajax="false"
+				data-direction="reverse" data-iconpos="notext"></a>
+			<a href="../../index.html" data-icon="home"  data-ajax="false"
+				data-transition="none" data-iconpos="notext"></a>
+		</div>
+		<div data-role="content" >
+			<div class="left-nav">
+				<div data-dp-template="../../title.html" ></div>
+				<hr/>
+				<div data-dp-template="navi.html"></div>
+			</div>
+
+			<div class="right-nav" >
+<h2>JQMDP の基本形</h2>
+<p>
+JQMDP で想定しているページの実装方法は以下の通りである。
+<ol>
+<li>ページと一対となる JavaScript クラスの実装。</li>
+<li>1. のクラスのインスタンスをページの スコープ インスタンス に設定。</li>
+<li>2. のインスタンスを操作して画面に反映。</li>
+</ol>
+
+ページに設定する スコープ インスタンス は通常１つしか作られないので
+クラスそのもので有っても構わない。
+他のページからアクセスしやすいようにグローバル変数に入れておいても良い。
+</p>
+
+<p>
+基本形の例としてユーザ一覧ページとユーザ編集ページを持つアプリの例を示す。
+
+<table border=1 cellspacing=0>
+	<tr><th>ページ</th><th>ページID</th><th>ページJSクラス</th></tr>
+	<tr><td>ユーザ一覧</td><td>id="UserList"</td><td>function UserList()</td></tr>
+	<tr><td>ユーザ編集</td><td>id="UserEdit"</td><td>function UserEdit()</td></tr>
+</table>
+<br />
+説明はコード内にする。<br />
+<a href="../../samples/basic/basic.html" target="_blank" data-ajax="false">このサンプルを実行する。</a>
+
+</p>
+
+HTMLコード：
+<pre data-dp-html="(basicHtml)"></pre>
+
+JavaScriptコード：
+<pre data-dp-html="(basicJs)"></pre>
+
+
+			</div>
+		</div>
+		<div data-role="footer" data-position="fixed" data-dp-template="../../footer.html"></div>
+	</div>
+</body>
+
+</html>

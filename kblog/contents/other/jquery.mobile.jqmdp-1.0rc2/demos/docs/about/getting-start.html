@@ -1,0 +1,100 @@
+<!DOCTYPE html> 
+<html> 
+	<head> 
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta id="viewport" name="viewport"
+		content="width=auto; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;" />
+	<title>jqmdp demo page</title> 
+
+	
+
+	<link rel="stylesheet" href="../../docs.css" />
+	<link rel="stylesheet" href="../../../js/jqm11/jquery.mobile-1.1.0.min.css" />
+	<script src="../../../js/jquery-1.7.1.js"></script>
+
+	<script src="../../../js/jquery.mobile.jqmdp-1.0rc2.js"></script>
+	<script src="../../../js/jqm11/jquery.mobile-1.1.0.js"></script>
+<script>
+$(document).bind('mobileinit',function(){
+	$("#index").live('pagebeforeshow', function(ev) {
+		$("#currentDate").text(""+new Date());
+	});
+})
+</script>
+
+</head>
+
+<body >
+	<div data-role="page" id="index" >
+		<div data-role="header" data-theme="e" >
+			<h1>Quick start guide</h1>
+			<a href="../../index.html" data-icon="back" data-ajax="false"
+				data-direction="reverse" data-iconpos="notext"></a>
+			<a href="../../index.html" data-icon="home"  data-ajax="false"
+				data-transition="none" data-iconpos="notext"></a>
+		</div>
+		<div data-role="content" >
+			<div class="left-nav">
+				<div data-dp-template="../../title.html" ></div>
+				<hr/>
+				<div data-dp-template="navi.html"></div>
+			</div>
+			
+			<div class="right-nav" >
+				<div>
+<h2>Getting Started with JQMDP</h2>
+<p>
+前提条件として jQuery mobile を利用する準備が整っていなければならない。
+<br/>jQuery mobile の準備については
+<a target="_blank" href="http://jquerymobile.com">こちらへ(http://jquerymobile.com)</a></div>
+</p>
+
+<p>
+まずは <a target="_blank" href="../../../js/jquery.mobile.jqmdp-1.0rc2.js">
+jquery.mobile.jqmdp-1.0rc2.js</a>
+をダウンロードして自分のWebサイトに配置する。
+<br/>
+配置した jquery.mobile.jqmdp-1.0rc2.js を jquery.mobile-1.1.0.js の直前に読み込めば準備完了である。
+<br/>
+<xmp><script src="jquery-1.7.1.js"></script>
+<script src="jquery.mobile.jqmdp-1.0rc2.js"></script>
+<script src="jquery.mobile-1.1.0.js"></script>
+</xmp>
+</p>
+
+
+簡単な例として現在の日時を表示するページの記述を比較する。
+<p/>
+jQuery Mobile:
+<pre>&lt;script>
+$(function(){
+  $("#index").live('pagebeforeshow', function(ev) {
+    $("#currentDate").text(""+new Date());
+  });
+})
+&lt;/script>
+
+&lt;div>Date: &lt;span id="currentDate">&lt;/span>&lt;/div>
+</pre>
+<p/>
+JQMDP:
+
+<pre>&lt;div>Date: &lt;span <b>data-dp-text="(new Date())"</b>>&lt;/span>&lt;/div></pre>
+<br/>
+実行結果はいずれも同じである。
+<blockquote>
+<div>Date: <span data-dp-text="(new Date())"></span></div>
+</blockquote>
+
+<p>
+このように JQMDP は data-dp- で始まるカスタム属性を利用し簡単に動的なページを作成できる。
+</p>
+
+			</div>
+		</div>
+		<div data-role="footer" data-position="fixed" data-dp-template="../../footer.html"></div>
+	</div>
+</body>
+
+</html>

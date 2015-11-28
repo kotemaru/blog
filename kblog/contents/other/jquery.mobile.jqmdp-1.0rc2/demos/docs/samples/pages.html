@@ -1,0 +1,199 @@
+<!DOCTYPE html> 
+<html> 
+	<head> 
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta id="viewport" name="viewport"
+		content="width=auto; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;" />
+	<title>jqmdp demo page</title> 
+	
+	<link rel="stylesheet" href="../../docs.css" />
+	<link rel="stylesheet" href="../../../js/jqm11/jquery.mobile-1.1.0.min.css" />
+	<script src="../../../js/jquery-1.7.1.js"></script>
+
+	<script src="../../../js/jquery.mobile.jqmdp-1.0rc2.js"></script>
+	<script src="../../../js/jqm11/jquery.mobile-1.1.0.js"></script>
+	<script src="../../docs.js"></script>
+
+</head>
+
+<body >
+	<div data-role="page" id="index" >
+		<div data-role="header" data-position="fixed" data-theme="e" >
+			<h1>Samples</h1>
+			<a href="../../index.html" data-icon="back" data-ajax="false"
+				data-direction="reverse" data-iconpos="notext"></a>
+			<a href="../../index.html" data-icon="home"  data-ajax="false"
+				data-transition="none" data-iconpos="notext"></a>
+		</div>
+		<div data-role="content" >
+			<div class="left-nav">
+				<div data-dp-template="../../title.html" ></div>
+				<hr/>
+				<div data-dp-template="navi.html"></div>
+			</div>
+
+			<div class="right-nav" >
+				サンプルコード。<br />
+				あまり数が用意できていません。おいおい増やして行きます。
+
+				<div data-dp-template="#linkList"></div>
+			</div>
+		</div>
+		<div data-role="footer" data-position="fixed" data-dp-template="../../footer.html"></div>
+	</div>
+	
+	<div data-role="template" id="linkList"   >
+		<ul data-role="listview" data-inset="true" >
+			<li><a href="#basic">基本形</a></li>
+			<li><a href="#map">Google Map</a></li>
+			<li><a href="#picasa">Picasa連係</a></li>
+			<li><a href="#test">テスト</a></li>
+		</ul>
+	</div>
+	
+	<!-- ============================================== -->
+	<div data-role="page" id="basic" >
+		<div data-role="header" data-position="fixed" data-theme="e" >
+			<h1>Basic</h1>
+			<a href="#index" data-icon="back" data-ajax="false"
+				data-direction="reverse" data-iconpos="notext"></a>
+			<a href="../../index.html" data-icon="home"  data-ajax="false"
+				data-transition="none" data-iconpos="notext"></a>
+		</div>
+		<div data-role="content" >
+			<div class="left-nav">
+				<div data-dp-template="../../title.html" ></div>
+				<hr/>
+				<div data-dp-template="#linkList"></div>
+			</div>
+			
+			<div class="right-nav" >
+				ユーザ一覧とユーザの編集／登録の出来るシンプルなサンプルです。
+				<p><a href="../../samples/basic/basic.html" 
+					data-role="button" data-icon="arrow-r" data-iconpos="right"
+					target="_blank" data-ajax="false">サンプルを実行</a>
+				</p>
+				
+				<h3>ソース</h3>
+				samples/basic/basic.html:
+				<pre data-dp-html="(Docs.getSrc($this,'../../samples/basic/basic.html'))"></pre>
+				samples/basic/basic.js:
+				<pre data-dp-html="(Docs.getSrc($this,'../../samples/basic/basic.js'))"></pre>
+			</div>
+
+		</div>
+		<div data-role="footer" data-position="fixed" data-dp-template="../../footer.html"></div>
+	</div>
+
+	<!-- ============================================== -->
+	<div data-role="page" id="map" >
+		<div data-role="header" data-position="fixed" data-theme="e" >
+			<h1>Google Map</h1>
+			<a href="#index" data-icon="back" data-ajax="false"
+				data-direction="reverse" data-iconpos="notext"></a>
+			<a href="../../index.html" data-icon="home"  data-ajax="false"
+				data-transition="none" data-iconpos="notext"></a>
+		</div>
+		<div data-role="content" >
+			<div class="left-nav">
+				<div data-dp-template="../../title.html" ></div>
+				<hr/>
+				<div data-dp-template="#linkList"></div>
+			</div>
+			
+			<div class="right-nav" >
+				Google Map のサンプルです。
+				<ul>
+					<li>マップをクリックするとヘッダの住所が変わります。</li>
+					<li>「Here」をクリックするとGPS情報から現在地へ移動します。</li>
+				</ul>
+				<p><a href="../../samples/map/map.html"
+					data-role="button" data-icon="arrow-r" data-iconpos="right"
+					target="_blank" data-ajax="false">サンプルを実行</a>
+				</p>
+				
+				<h3>ソース</h3>
+				samples/map/map.html:
+				<pre data-dp-html="(Docs.getSrc($this,'../../samples/map/map.html'))"></pre>
+				samples/map/Map.js:
+				<pre data-dp-html="(Docs.getSrc($this,'../../samples/map/Map.js'))"></pre>
+			</div>
+
+		</div>
+		<div data-role="footer" data-position="fixed" data-dp-template="../../footer.html"></div>
+	</div>
+
+	
+	<!-- ============================================== -->
+	<div data-role="page" id="picasa" >
+		<div data-role="header" data-position="fixed" data-theme="e" >
+			<h1>Picasa連係</h1>
+			<a href="#index" data-icon="back" data-ajax="false"
+				data-direction="reverse" data-iconpos="notext"></a>
+			<a href="../../index.html" data-icon="home"  data-ajax="false"
+				data-transition="none" data-iconpos="notext"></a>
+		</div>
+		<div data-role="content" >
+			<div class="left-nav">
+				<div data-dp-template="../../title.html" ></div>
+				<hr/>
+				<div data-dp-template="#linkList"></div>
+			</div>
+			
+			<div class="right-nav" >
+				Picasa の公開アルバムから画像を選択します。<br />
+				<p>
+				画像をクリックするとダイアログが現れアルバム、写真で選択できます。
+				
+				<p><a href="../../samples/picasa/picasa.html"
+					data-role="button" data-icon="arrow-r" data-iconpos="right"
+					target="_blank" data-ajax="false">サンプルを実行</a>
+				</p>
+				
+				<h3>ソース</h3>
+				samples/picasa/picasa.html:
+				<pre data-dp-html="(Docs.getSrc($this,'../../samples/picasa/picasa.html'))"></pre>
+				samples/picasa/Picasa.js:
+				<pre data-dp-html="(Docs.getSrc($this,'../../samples/picasa/Picasa.js'))"></pre>
+				samples/picasa/Picasa.css:
+				<pre data-dp-html="(Docs.getSrc($this,'../../samples/picasa/Picasa.css'))"></pre>
+			</div>
+
+		</div>
+		<div data-role="footer" data-position="fixed" data-dp-template="../../footer.html"></div>
+	</div>
+	
+	<!-- ============================================== -->
+	<div data-role="page" id="test" >
+		<div data-role="header" data-position="fixed" data-theme="e" >
+			<h1>テスト</h1>
+			<a href="#index" data-icon="back" data-ajax="false"
+				data-direction="reverse" data-iconpos="notext"></a>
+			<a href="../../index.html" data-icon="home"  data-ajax="false"
+				data-transition="none" data-iconpos="notext"></a>
+		</div>
+		<div data-role="content" >
+			<div class="left-nav">
+				<div data-dp-template="../../title.html" ></div>
+				<hr/>
+				<div data-dp-template="#linkList"></div>
+			</div>
+			
+			<div class="right-nav" >
+				テスト用です。 意味は有りません。
+				<p><a href="../../samples/tests/tests.html"
+					data-role="button" data-icon="arrow-r" data-iconpos="right"
+					target="_blank" data-ajax="false">サンプルを実行</a>
+				</p>
+				samples/tests/tests.html:
+				<pre data-dp-html="(Docs.getSrc($this,'../../samples/tests/tests.html'))"></pre>
+			</div>
+
+		</div>
+		<div data-role="footer" data-position="fixed" data-dp-template="../../footer.html"></div>
+	</div>
+
+</body>
+
+</html>
