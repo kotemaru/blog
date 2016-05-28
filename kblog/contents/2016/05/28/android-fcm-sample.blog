@@ -1,0 +1,235 @@
+Subject: Androidの新プッシュ通知FCMへの移行
+Content-type: markdown/text
+Tags: android, GCM, FCM
+Date: 2016/05/28
+Public: yes
+
+GCM-3.0 のサンプルを書いたばかりなのに Google IO 2016 で新たなプッシュ通知のAPIである 
+FCM(Firebase Cloud Messaging) が発表されました。
+
+いい加減にしろよ Google。 なんで API が１年しか寿命ねーんだよ。
+学習コストとか保守コストか考えろよ！！
+
+しかたが無いので GCM 3.0 から FCM への移行のまとめです。<br>
+前回の GCM 3.0 のサンプルを移行します。
+
+## 基本情報
+
+基本的な情報へのリンクです。
+
+  * [GCMはGCM 3.0を経てFCMへ (Firebase)](http://qiita.com/tnir/items/c290a00ddfa3cd41fb6d)
+  * [FCM公式](https://firebase.google.com/docs/cloud-messaging/)
+  * [公式FCM移行ドキュメント](https://developers.google.com/cloud-messaging/android/android-migrate-fcm)
+
+## GCM3.0との差異
+
+  * プロジェクト管理が [Developer console](https://console.developers.google.com) から
+[Firebase console](https://console.firebase.google.com/) に変更になります。
+  * API は com.google.android.gms から com.google.firebase に変更になります。
+  * コード埋め込みだった各種キーコードは google-services.json に集約されます。
+  * サーバ側のメッセージ送信先 URL が gcm-http.googleapis.com/gcm/send から
+fcm.googleapis.com/fcm/send に変更になります。
+    * これはオプションなのでそのままでも当面問題無し。
+
+その他の基本的な仕組みは GCM3.0 と変わっていません。
+
+## 準備
+
+FCM を使うための準備をします。
+ここでは GCM からの移行を行います。
+
+[Firebase console](https://console.firebase.google.com/) をブラウザで開いてログインします。
+
+<img src="/2016/05/28/android-fcm-sample-1.png" width="500"/>
+
+「google プロジェクトからのインポート」をクリックします。
+
+<br><img src="/2016/05/28/android-fcm-sample-4.png" width="500"/>
+
+元になるプロジェクトを選択します。<br>
+国/地域を「日本」に設定します。<br>
+「FIREBASEを追加」をクリックします。<br>
+
+
+<br><img src="/2016/05/28/android-fcm-sample-5.png" width="500"/>
+
+「AndroidアプリにFirebaseを追加」をクリックします。
+
+<br><img src="/2016/05/28/android-fcm-sample-6.png" width="500"/>
+
+アプリのパッケージ名を設定して「アプリを追加」をクリックします。<br>
+以降のステップは「続行」、「完了」で飛ばします。
+
+<br><img src="/2016/05/28/android-fcm-sample-8.png" width="500"/>
+
+メニューの「管理」を選択します。
+
+<br><img src="/2016/05/28/android-fcm-sample-9.png" width="500"/>
+
+google-services.json をダウンロードして保管します。
+
+
+## ソースコードの変更
+
+基本的には公式ドキュメントのままなのですがそのままだと動かないので注意が必要です。
+
+  * [公式FCM移行ドキュメント](https://developers.google.com/cloud-messaging/android/android-migrate-fcm)
+
+前の GCM-3.0 のサンプルからの変更点です。
+
+  * [https://github.com/kotemaru/GCM-sample2](https://github.com/kotemaru/GCM-sample2)
+
+### gradle
+
+単純に [公式FCM移行ドキュメント](https://developers.google.com/cloud-messaging/android/android-migrate-fcm)
+の設定だけを行うと以下のエラーが出てハマります。
+
+	Error Failed to resolve: com.google.firebase:firebase-messaging:9.0.0
+
+google-services のライブラリが必要なようなので一緒に追加する必要があります。
+
+#### build.gradle
+
+	buildscript {
+			:
+		dependencies {
+				:
+			classpath 'com.google.gms:google-services:3.0.0'
+		}
+	}
+
+#### app/build.gradle
+
+	dependencies {
+			:
+		compile 'com.google.android.gms:play-services-gcm:9.0.0'
+		compile 'com.google.firebase:firebase-messaging:9.0.0'
+	}
+	apply plugin: 'com.google.gms.google-services'
+
+### AndroidMAnifest.xml
+
+	<!--
+	        <receiver
+	            android:name="com.google.android.gms.gcm.GcmReceiver"
+	            android:exported="true"
+	            android:permission="com.google.android.c2dm.permission.SEND">
+	            <intent-filter>
+	                <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
+	                <category android:name="org.kotemaru.android.gcm_sample"/>
+	            </intent-filter>
+	        </receiver>
+	-->
+	        <service
+	            android:name="org.kotemaru.android.gcm_sample2.lib.TokenRefreshService">
+	            <intent-filter>
+	                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
+	            </intent-filter>
+	        </service>
+	
+	        <service
+	            android:name="org.kotemaru.android.gcm_sample2.lib.GCMReceiverService">
+	            <intent-filter>
+	                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+	            </intent-filter>
+	        </service>
+
+
+  * GcmReceiver は不要になります。
+  * Service２つはフィルターが変更になってexportedが有効になります。
+
+
+### Javaソース
+
+#### GCMReceiverService.java
+
+	public class GCMReceiverService
+	        //extends GcmListenerService      // for GCM-3.0
+	        extends FirebaseMessagingService  // for FCM
+	{
+						:
+	    @Override
+	    public void onMessageReceived(RemoteMessage message){
+	        String from = message.getFrom();
+	        Map<String,String> data = message.getData();
+	
+	        Bundle bundle = new Bundle();
+	        for (Map.Entry<String,String> ent : data.entrySet()) {
+	            bundle.putString(ent.getKey(), ent.getValue());
+	        }
+	        onMessageReceived(from, bundle);
+	    }
+
+  * 継承元を GcmListenerService から FirebaseMessagingService に変更します。
+  * onMessageReceived() の引数が変わるので変換して旧APIに転送するメソッドを追加します。
+
+#### TokenRefreshService.java
+
+	    public class TokenRefreshService
+	        // extends InstanceIDListenerService  // for GCM-3.0
+	        extends FirebaseInstanceIdService     // for FCM
+
+  * 継承元を InstanceIDListenerService から FirebaseInstanceIdService に変更します。
+
+#### GCMRegister.java
+
+
+	    private static String registerSync(final Context context, final String senderId) {
+	        try {
+	            // for GCM-3.0
+	            //InstanceID instanceID = InstanceID.getInstance(context);
+	            //String regId = instanceID.getToken(senderId, GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
+	            // for FCM
+	            String regId = FirebaseInstanceId.getInstance().getToken();
+	
+	            Log.d(TAG, "registerSync: " + senderId + ":" + regId);
+	            return regId;
+	        } catch (Exception e) {
+	            Log.e(TAG, "Failed get token:" + senderId, e);
+	            return null;
+	        }
+	    }
+
+  * InstanceID.getToken() を FirebaseInstanceId.getInstance().getToken() に変更します。
+  * ※1:アプリによって実装場所は違います。
+  * ※2:senderId は google-services.json で持っているため FCM では使っていません。
+
+### app/google-services.json
+
+  * ダウンロードしておいた google-services.json を app/ の直下に配置します。
+
+### サーバ
+
+	var API_KEY = 'google-services.jsonのapi_key/current_keyの値';
+				:
+	function requestGCM(postData, callback) {
+		var buff = new Buffer(JSON.stringify(postData));
+		var requestOpts = {
+			method : 'POST',
+			//host : 'gcm-http.googleapis.com', // for GCM-3.0
+			//path : '/gcm/send',               // for GCM-3.0
+			host : 'fcm.googleapis.com',        // for FCM
+			path : '/fcm/send',                 // fot FCM
+			port : 443,
+			headers : {
+				'Content-length' : buff.length,
+				'Connection' : 'close',
+				'Content-Type' : 'application/json;charset=utf-8',
+				'Authorization' : 'key=' + API_KEY
+			}
+		};
+
+  * API-KEY は変わってしまうらしいので google-services.json 内の
+api_key/current_key の項目の値に差し替えが必要です。
+  * ※3: 送信先の URL は当面変更しなくても問題無いようです。
+  * ※4: FCM の URL に変更した場合に GCM のアプリに届くのかは未検証です。
+
+## 所感
+
+gradle の設定でつまずきましたがそれ以外は思ったより手間がかからず移行できました。<br>
+GCM-3.0は当面使えるらしいので慌てて移行する必要は無いと思われます。<br>
+これから実装する物に関しては FCM にしておくべきでしょうが。
+
+  * サンプル一式：[https://github.com/kotemaru/FCM-sample](https://github.com/kotemaru/FCM-sample)
+
+
