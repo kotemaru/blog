@@ -198,10 +198,16 @@ google-services のライブラリが必要なようなので一緒に追加す�
 
   * ダウンロードしておいた google-services.json を app/ の直下に配置します。
 
+　　<img src="/2016/05/28/android-fcm-sample-10.png" />
+
 ### サーバ
 
+サンプルのサーバは nodejs です。
+
 	var API_KEY = 'google-services.jsonのapi_key/current_keyの値';
+	
 				:
+				
 	function requestGCM(postData, callback) {
 		var buff = new Buffer(JSON.stringify(postData));
 		var requestOpts = {
@@ -219,10 +225,11 @@ google-services のライブラリが必要なようなので一緒に追加す�
 			}
 		};
 
-  * API-KEY は変わってしまうらしいので google-services.json 内の
-api_key/current_key の項目の値に差し替えが必要です。
-  * ※3: 送信先の URL は当面変更しなくても問題無いようです。
-  * ※4: FCM の URL に変更した場合に GCM のアプリに届くのかは未検証です。
+  * API-KEY を google-services.json 内の api_key/current_key の項目の値に差し替えます。
+    * プログラムが google-services.json を参照するようにしておく方が良いかと思います。
+  * 送信先の URL を FCM に切り替えます。
+    * ※3: 送信先の URL は当面変更しなくても問題無いようです。
+    * ※4: FCM の URL に変更した場合に GCM のアプリに届くのかは未検証です。
 
 ## 所感
 
