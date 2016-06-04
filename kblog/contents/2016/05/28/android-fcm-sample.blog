@@ -238,5 +238,3 @@ GCM-3.0は当面使えるらしいので慌てて移行する必要は無いと�
 これから実装する物に関しては FCM にしておくべきでしょうが。
 
   * サンプル一式：[https://github.com/kotemaru/FCM-sample](https://github.com/kotemaru/FCM-sample)
-
-

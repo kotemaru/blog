@@ -287,3 +287,35 @@ public class LoopHScrollView extends HorizontalScrollView {
 ちゃんとループ出来てます。<br>
 セレクタ系 UI では使えそうな気がする。
 
+## 追記(2016/6/4)
+
+フラグメントから使うと上手くいかないとのコメントが有ったので修正方法。
+
+	    public class InnerLayout extends LinearLayout {
+	        public InnerLayout(Context context) {
+	            super(context);
+	        }
+	
+	        @Override
+	        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+	            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+	            if (getChildCount() == 3) {
+	                View clone1 = this.getChildAt(0);
+	                View origin = this.getChildAt(1);
+	                View clone2 = this.getChildAt(2);
+	                int width = origin.getMeasuredWidth();
+	                if (width < LoopHScrollView.this.getMeasuredWidth()) {
+	                    // TODO: Can not scroll small child view.
+	                    mInnerLayout.removeView(clone1);
+	                    mInnerLayout.removeView(clone2);
+	                } else {
+	                    clone1.setMinimumWidth(width);
+	                    clone2.setMinimumWidth(width);
+	                }
+	                super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+	            }
+	        }
+	    }
+
+   * サイズ補正のタイミングを onMeasure() に移動して解決。
+
