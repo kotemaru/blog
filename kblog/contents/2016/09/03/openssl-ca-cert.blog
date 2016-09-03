@@ -1,0 +1,64 @@
+Subject: opensslでオレオレ証明書　備忘録
+Content-type: markdown/text
+Tags: openssl
+Date: 2016/09/03
+Public: yes
+
+オレオレ証明書が必要になるたび毎回ググッているのでの作り方メモっとく。
+
+  * 参考：[OpenSSLコマンドでオレオレ証明書を作り、ルート認証局としてサーバー証明書を発行する](http://tech.sanwasystem.com/entry/2015/08/31/234131)
+
+参考サイトを整理してスクリプトに落としただけ。
+
+
+#### make-ca.sh
+
+ルート証明書を作成するスクリプト。
+
+	#!/bin/sh
+	
+	CA_SUBJ="/C=JP/ST=Tokyo/L=shinjyuku/O=oreore/OU=ore/CN=ore"
+	
+	openssl genrsa 2048 > ca.key
+	openssl req -new -key ca.key -subj "$CA_SUBJ" > ca.csr
+	openssl x509 -days 36500 -req -signkey ca.key < ca.csr > ca.crt
+	
+	# see /usr/ssl/openssl.cnf
+	DIR=demoCA
+	rm -r $DIR
+	mkdir -p $DIR
+	mkdir -p $DIR/private
+	mkdir -p $DIR/crl
+	mkdir -p $DIR/certs
+	mkdir -p $DIR/newcerts
+	echo "01" > $DIR/serial
+	touch $DIR/index.txt
+	
+	echo FINISH
+
+
+#### make-server.sh
+
+サーバ証明書を作成するスクリプト。
+
+	#!/bin/sh
+	
+	if ["$1" == ""] ; then 
+		echo "Usage: $0 <server-domain-name>"
+		exit
+	fi
+	
+	SERVER_SUBJ="/C=JP/ST=Tokyo/L=shinjyuku/O=oreore/OU=ore/CN=$1"
+	
+	openssl genrsa 2048 > server.key
+	openssl req -new -key server.key -subj "$SERVER_SUBJ" > server.csr
+	openssl ca -days 36500 -keyfile ca.key -cert ca.crt -in server.csr -out server.crt 
+	openssl pkcs12 -export -in server.crt -inkey server.key -out server.pfx
+
+  * ルート証明書を作ったフォルダと同じ所で実行する。
+  * 引数にサーバのドメイン名を指定する。
+
+
+
+
+	
