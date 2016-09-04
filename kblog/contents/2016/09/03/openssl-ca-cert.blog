@@ -6,7 +6,9 @@ Public: yes
 
 オレオレ証明書が必要になるたび毎回ググッているのでの作り方メモっとく。
 
-  * 参考：[OpenSSLコマンドでオレオレ証明書を作り、ルート認証局としてサーバー証明書を発行する](http://tech.sanwasystem.com/entry/2015/08/31/234131)
+  * 参考サイト
+     * [OpenSSLコマンドでオレオレ証明書を作り、ルート認証局としてサーバー証明書を発行する](http://tech.sanwasystem.com/entry/2015/08/31/234131)
+     * [OpenSSLでプライベートCAを構築して、クライアント用ルート証明書を作成](http://oxynotes.com/?p=4516)
 
 参考サイトを整理してスクリプトに落としただけ。
 
@@ -17,11 +19,17 @@ Public: yes
 
 	#!/bin/sh
 	
-	CA_SUBJ="/C=JP/ST=Tokyo/L=shinjyuku/O=oreore/OU=ore/CN=ore"
+	CA_SUBJ="/C=JP/ST=Tokyo/L=Shinjyuku/O=Oreore/OU=Admin/CN=ore.jp/emailAddress=admin@ore.jp"
 	
 	openssl genrsa 2048 > ca.key
-	openssl req -new -key ca.key -subj "$CA_SUBJ" > ca.csr
-	openssl x509 -days 36500 -req -signkey ca.key < ca.csr > ca.crt
+	openssl req  -new -key ca.key -subj "$CA_SUBJ" > ca.csr
+	#openssl x509 -days 36500 -req -signkey ca.key < ca.csr > ca.crt
+	openssl ca -create_serial -days 36500 -batch -keyfile ca.key -selfsign \
+	  -extensions v3_ca -infiles ca.csr > ca.crt
+	
+	openssl x509 -text < ca.crt
+	openssl verify < ca.crt
+	openssl pkcs12 -export -in ca.crt -inkey ca.key -out ca.pfx
 	
 	# see /usr/ssl/openssl.cnf
 	DIR=demoCA
@@ -48,15 +56,46 @@ Public: yes
 		exit
 	fi
 	
-	SERVER_SUBJ="/C=JP/ST=Tokyo/L=shinjyuku/O=oreore/OU=ore/CN=$1"
+	SERVER_SUBJ="/C=JP/ST=Tokyo/L=shinjyuku/O=Oreore/OU=target/CN=$1"
 	
+	awk -f config.awk < /usr/ssl/openssl.cnf > openssl.cnf
 	openssl genrsa 2048 > server.key
-	openssl req -new -key server.key -subj "$SERVER_SUBJ" > server.csr
-	openssl ca -days 36500 -keyfile ca.key -cert ca.crt -in server.csr -out server.crt 
+	openssl req -config openssl.cnf -new -key server.key -subj "$SERVER_SUBJ" > server.csr
+	openssl ca -config openssl.cnf -days 36500 -keyfile ca.key -cert ca.crt -in server.csr -out server.crt 
 	openssl pkcs12 -export -in server.crt -inkey server.key -out server.pfx
 
   * ルート証明書を作ったフォルダと同じ所で実行する。
   * 引数にサーバのドメイン名を指定する。
+
+#### config.awk
+
+openssl.cnf はデフォルトだとダメなので書き換えるawkスクリプト。
+
+	#/usr/bin/awk -f
+	usr_cert == 0 || (!/basicConstraints/ && !/nsCertType/ && !/keyUsage/) {
+		print $0;
+	}
+	
+	/^\[/{
+		if ($0 ~ /usr_cert/) {
+			usr_cert = 1;
+			print "basicConstraints=CA:TRUE";
+			print "nsCertType = sslCA, emailCA";
+			print "keyUsage = cRLSign, keyCertSign";
+		} else {
+			usr_cert = 0;
+		}
+	}
+
+### 補足
+
+Android/6.0.1 にインストールする場合は設定アプリの「セキュリティ」->「ストレージからのインストール」
+から <b>pfx</b> ファイルをインストールする。
+
+crt ファイルは何故かインストールできない。OSバージョンによっても違いそうなので要注意。
+
+
+
 
 
 
